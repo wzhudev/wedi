@@ -1,0 +1,8 @@
+node_modules
+example
+*.log
+*.tgz
+.env
+.next
+.DS_Store
+azure-pipelines.yml

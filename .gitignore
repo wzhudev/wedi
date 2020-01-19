@@ -1,0 +1,19 @@
+*/.DS_Store
+
+# dirs
+build/
+node_modules/
+dists/
+coverage/
+
+# editor
+.idea/
+
+# lockfiles
+package-lock.json
+yarn.lock
+
+# build
+dist
+esm
+demo
