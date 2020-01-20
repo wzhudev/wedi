@@ -1,7 +1,7 @@
 import { act, render } from '@testing-library/react';
 import React, { Component } from 'react';
 import { interval } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { scan, startWith } from 'rxjs/operators';
 
 import { Provide, useDependency, useDependencyValue } from '../src';
 
@@ -10,10 +10,9 @@ describe('di-rx', () => {
   // Here we use RxJS as an example.
   it('should demo works with RxJS', async () => {
     class CounterService {
-      count = 0;
       counter$ = interval(1000).pipe(
         startWith(0),
-        map(() => this.count++)
+        scan((acc) => acc + 1)
       );
     }
 

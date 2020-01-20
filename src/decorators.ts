@@ -1,5 +1,5 @@
 import { Ctor, DependencyKey, Identifier } from './typings';
-import * as DIUtils from './utils';
+import { dependencyIds, setDependencies } from './utils';
 
 function getDecoratorMisUsedError(
   targetName: string,
@@ -12,10 +12,10 @@ function getDecoratorMisUsedError(
 }
 
 export function createIdentifier<T>(name: string): Identifier<T> {
-  if (DIUtils.dependencyIds.has(name)) {
+  if (dependencyIds.has(name)) {
     console.warn(`[DI] duplicated identifier name ${name}.`);
 
-    return DIUtils.dependencyIds.get(name)!;
+    return dependencyIds.get(name)!;
   }
 
   const id = function(target: Ctor<T>, _key: string, index: number): void {
@@ -23,13 +23,13 @@ export function createIdentifier<T>(name: string): Identifier<T> {
       throw getDecoratorMisUsedError(target.name, name);
     }
 
-    DIUtils.setDependencies(target, id, index, false);
+    setDependencies(target, id, index, false);
   } as any;
 
   id.toString = () => name;
   id.$$identifier = true;
 
-  DIUtils.dependencyIds.set(name, id);
+  dependencyIds.set(name, id);
 
   return id;
 }
@@ -43,7 +43,7 @@ export function Optional<T>(key: DependencyKey<T>) {
       throw getDecoratorMisUsedError(target.name, key.toString());
     }
 
-    DIUtils.setDependencies(target, key, index, true);
+    setDependencies(target, key, index, true);
   };
 }
 
@@ -56,6 +56,6 @@ export function Need<T>(key: DependencyKey<T>) {
       throw getDecoratorMisUsedError(target.name, key.constructor.name);
     }
 
-    DIUtils.setDependencies(target, key, index, false);
+    setDependencies(target, key, index, false);
   };
 }
