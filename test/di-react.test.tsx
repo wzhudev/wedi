@@ -19,66 +19,95 @@ class Log {
 }
 
 describe('di-react', () => {
-  it('should support class component provider', () => {
-    @Provide([Log])
-    class App extends Component {
-      static contextType = InjectionContext;
+  describe('class component', () => {
+    it('should support class component provider', () => {
+      @Provide([Log])
+      class App extends Component {
+        static contextType = InjectionContext;
 
-      @Inject(Log) private log!: Log;
+        @Inject(Log) private log!: Log;
 
-      render() {
-        return <div>{this.log.log()}</div>;
+        render() {
+          return <div>{this.log.log()}</div>;
+        }
       }
-    }
 
-    const { container } = render(<App />);
-    expect(container.firstChild!.textContent).toBe('[WeDI]');
+      const { container } = render(<App />);
+      expect(container.firstChild!.textContent).toBe('[WeDI]');
+    });
+
+    // it('should raise error when user tries to set dependency', () => {
+    //   class A {}
+
+    //   @Provide([A])
+    //   class App extends Component {
+    //     static contextType = InjectionContext;
+
+    //     @Inject(A) public a!: A;
+
+    //     render() {
+    //       return <div onClick={() => (this.a = null as any)}>WeDI</div>;
+    //     }
+    //   }
+
+    //   const { container } = render(<App />);
+
+    //   expect(() => {
+    //     act(() => {
+    //       fireEvent.click(container.firstElementChild!);
+    //     });
+    //   }).toThrow();
+    // });
+
+    it('should raise error when component context is not set to InjectionContext', () => {});
   });
 
-  it('should support functional component provider, and not recreate collection when function component container re-renders', async () => {
-    let count = 0;
+  describe('functional component', () => {
+    it('should not recreate collection when function component container re-renders', async () => {
+      let count = 0;
 
-    class Counter {
-      constructor() {
-        count += 1;
+      class Counter {
+        constructor() {
+          count += 1;
+        }
+
+        getCount(): number {
+          return count;
+        }
       }
 
-      getCount(): number {
-        return count;
+      function Parent() {
+        const collection = useCollection([Counter]);
+        const [visible, setVisible] = useState(false);
+        return (
+          <div onClick={() => setVisible(!visible)}>
+            <Provider collection={collection}>
+              {visible ? <Children></Children> : <div>Nothing</div>}
+            </Provider>
+          </div>
+        );
       }
-    }
 
-    function Parent() {
-      const collection = useCollection([Counter]);
-      const [visible, setVisible] = useState(false);
-      return (
-        <div onClick={() => setVisible(!visible)}>
-          <Provider collection={collection}>
-            {visible ? <Children></Children> : <div>Nothing</div>}
-          </Provider>
-        </div>
-      );
-    }
+      function Children() {
+        const counter = useDependency<Counter>(Counter);
+        return <div>{counter.getCount()}</div>;
+      }
 
-    function Children() {
-      const counter = useDependency<Counter>(Counter);
-      return <div>{counter.getCount()}</div>;
-    }
+      const { container } = render(<Parent />);
+      expect(count).toBe(0);
 
-    const { container } = render(<Parent />);
-    expect(count).toBe(0);
+      await act(() => {
+        fireEvent.click(container.firstElementChild!);
+        return new Promise<undefined>((res) => setTimeout(res, 200));
+      });
+      expect(count).toBe(1);
 
-    await act(() => {
-      fireEvent.click(container.firstElementChild!);
-      return new Promise<undefined>((res) => setTimeout(res, 200));
+      await act(() => {
+        fireEvent.click(container.firstElementChild!);
+        return new Promise<undefined>((res) => setTimeout(res, 200));
+      });
+      expect(count).toBe(1);
     });
-    expect(count).toBe(1);
-
-    await act(() => {
-      fireEvent.click(container.firstElementChild!);
-      return new Promise<undefined>((res) => setTimeout(res, 200));
-    });
-    expect(count).toBe(1);
   });
 
   it('should support layered providers', () => {
@@ -148,8 +177,8 @@ describe('di-react', () => {
         }
       }
 
+      // Weird that the test passes while leaving an uncaught error in the console...
       expect(() => render(<App></App>)).toThrow(
-        // Weird that the test passes while leaving an uncaught error in the console...
         '[WeDI] Cannot get an instance of "Log".'
       );
     });
@@ -172,7 +201,7 @@ describe('di-react', () => {
   });
 
   describe('should dispose', () => {
-    it('should dispose when class component destroy', async () => {
+    it('should dispose when class component destroys', async () => {
       let disposed = false;
 
       class A implements IDisposable {
@@ -216,7 +245,7 @@ describe('di-react', () => {
       expect(disposed).toBeTruthy();
     });
 
-    it('should dispose when functional component destroy', async () => {
+    it('should dispose when functional component destroys', async () => {
       let disposed = false;
 
       class A implements IDisposable {

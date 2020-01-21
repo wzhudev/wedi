@@ -12,9 +12,13 @@ import {
   isFactoryItem,
   isValueItem
 } from './typings';
-import { getDependencies, getDependencyKeyName } from './utils';
-
-let recursionCounter = 0;
+import {
+  assertRecursionNotTrappedInACircle,
+  completeInitialization,
+  getDependencies,
+  getDependencyKeyName,
+  requireInitialization
+} from './utils';
 
 export class Injector implements IDisposable {
   private readonly parent?: Injector;
@@ -52,7 +56,7 @@ export class Injector implements IDisposable {
    * Get a dependency.
    */
   get<T>(id: DependencyKey<T>): T | null {
-    const thing = this.__getDependencyOrIdentifierPair(id);
+    const thing = this.getDependencyOrIdentifierPair(id);
 
     if (typeof thing === 'undefined') {
       // Not provided.
@@ -69,7 +73,7 @@ export class Injector implements IDisposable {
    * Get a dependency or create one in the current injector.
    */
   getOrInit<T>(id: DependencyKey<T>): T | null {
-    const thing = this.__getDependencyOrIdentifierPair(id);
+    const thing = this.getDependencyOrIdentifierPair(id);
 
     if (typeof thing === 'undefined') {
       return null;
@@ -138,22 +142,20 @@ export class Injector implements IDisposable {
     return new theCtor(...args, ...resolvedArgs);
   }
 
-  __getDependencyOrIdentifierPair<T>(
+  private getDependencyOrIdentifierPair<T>(
     id: DependencyKey<T>
   ): T | DependencyValue<T> | undefined {
     return (
       this.collection.get(id) ||
-      (this.parent
-        ? this.parent.__getDependencyOrIdentifierPair(id)
-        : undefined)
+      (this.parent ? this.parent.getDependencyOrIdentifierPair(id) : undefined)
     );
   }
 
-  __putDependencyBack<T>(key: DependencyKey<T>, value: T): void {
+  private putDependencyBack<T>(key: DependencyKey<T>, value: T): void {
     if (this.collection.get(key)) {
       this.collection.add(key, value);
     } else if (this.parent) {
-      this.parent.__putDependencyBack(key, value);
+      this.parent.putDependencyBack(key, value);
     } else {
       throw new Error(
         `[WeDI] cannot find a place to to the new created ${getDependencyKeyName(
@@ -164,18 +166,17 @@ export class Injector implements IDisposable {
   }
 
   private createAndCacheInstance<T>(
-    key: DependencyKey<T>,
+    dKey: DependencyKey<T>,
     initPromise: InitPromise<T>
   ) {
-    recursionCounter += 1;
-
-    this.assertRecursionNotTrappedInACircle(key);
+    requireInitialization();
+    assertRecursionNotTrappedInACircle(dKey);
 
     const ctor = initPromise.ctor;
     let thing: T;
 
     if (initPromise.lazyInstantiation) {
-      const idle = new IdleValue<T>(() => this.doCreateInstance(key, ctor));
+      const idle = new IdleValue<T>(() => this.doCreateInstance(dKey, ctor));
       thing = new Proxy(Object.create(null), {
         get(target: any, key: string | number | symbol): any {
           if (key in target) {
@@ -196,27 +197,18 @@ export class Injector implements IDisposable {
         }
       }) as T;
     } else {
-      thing = this.doCreateInstance(key, ctor);
+      thing = this.doCreateInstance(dKey, ctor);
     }
 
-    recursionCounter -= 1;
+    completeInitialization();
 
     return thing;
   }
 
   private doCreateInstance<T>(id: DependencyKey<T>, ctor: Ctor<T>): T {
     const thing = this.createInstance(ctor);
-    this.__putDependencyBack(id, thing);
+    this.putDependencyBack(id, thing);
     return thing;
-  }
-
-  private assertRecursionNotTrappedInACircle(id: DependencyKey<any>): void {
-    if (recursionCounter > 10) {
-      recursionCounter = 0; // Reset the value here. Otherwise test would fail.
-      throw new Error(
-        '[WeDI] "_createInstance" exceeds the limitation of recursion. There might be a circular dependency."'
-      );
-    }
   }
 
   private invokeDependencyFactory<T>(

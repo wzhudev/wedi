@@ -31,6 +31,36 @@ export function setDependencies<T>(
   }
 }
 
+const RECURSION_MAX = 10;
+
+let recursionCounter = 0;
+
+export function requireInitialization(): void {
+  recursionCounter += 1;
+}
+
+export function completeInitialization(): void {
+  recursionCounter -= 1;
+}
+
+export function resetRecursionCounter() {
+  recursionCounter = 0;
+}
+
+export function assertRecursionNotTrappedInACircle(
+  key: DependencyKey<any>
+): void {
+  if (recursionCounter > RECURSION_MAX) {
+    resetRecursionCounter();
+
+    throw new Error(
+      `[WeDI] "createInstance" exceeds the limitation of recursion (${RECURSION_MAX}x). ` +
+        `There might be a circular dependency among your dependency items. ` +
+        `Last target was "${getDependencyKeyName(key)}".`
+    );
+  }
+}
+
 export function getDependencyKeyName(key: DependencyKey<any>): string {
   return isIdentifier(key) ? key.toString() : key.name;
 }
