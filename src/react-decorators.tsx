@@ -25,7 +25,7 @@ export function Provide(items: DependencyItem<any>[]) {
       }
 
       componentWillUnmount(): void {
-        this.$$collection?.dispose();
+        this.$$collection.dispose();
       }
 
       render() {

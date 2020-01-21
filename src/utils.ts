@@ -56,7 +56,7 @@ export function assertRecursionNotTrappedInACircle(
     throw new Error(
       `[WeDI] "createInstance" exceeds the limitation of recursion (${RECURSION_MAX}x). ` +
         `There might be a circular dependency among your dependency items. ` +
-        `Last target was ${getDependencyKeyName(key)}`
+        `Last target was "${getDependencyKeyName(key)}".`
     );
   }
 }

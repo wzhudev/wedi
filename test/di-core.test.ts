@@ -219,7 +219,7 @@ describe('di-core', () => {
   });
 
   describe('dispose', () => {
-    it('should not be accessible after disposion', () => {
+    it('should not be accessible after disposing', () => {
       const id = createIdentifier('void');
       const injector = new Injector(new DependencyCollection());
 
@@ -231,7 +231,7 @@ describe('di-core', () => {
   });
 
   describe('falsy situations', () => {
-    it('should return null when dependency is not retreivable', () => {
+    it('should return null when dependency is not retrievable', () => {
       const id = createIdentifier('void');
       const injector = new Injector(new DependencyCollection());
 
@@ -243,7 +243,7 @@ describe('di-core', () => {
       class A {}
 
       class B {
-        constructor(@Need(A) a: A) {}
+        constructor(@Need(A) public _a: A) {}
       }
 
       const injector = new Injector(new DependencyCollection([B]));
@@ -258,11 +258,11 @@ describe('di-core', () => {
       const id2 = createIdentifier('b');
 
       class A {
-        constructor(@Need(id2) public b: B) {}
+        constructor(@Need(id2) public _b: B) {}
       }
 
       class B {
-        constructor(@Need(id) public a: A) {}
+        constructor(@Need(id) public _a: A) {}
       }
 
       const injector = new Injector(
@@ -275,12 +275,12 @@ describe('di-core', () => {
       expect(() => {
         injector.getOrInit(id);
       }).toThrow(
-        `[WeDI] "_createInstance" exceeds the limitation of recursion. There might be a circular dependency.`
+        `[WeDI] "createInstance" exceeds the limitation of recursion (10x). There might be a circular dependency among your dependency items. Last target was "a".`
       );
     });
   });
 
-  describe('class inheritence', () => {
+  describe('class inheritance', () => {
     it('should support initialize inherited classes', () => {
       class A {}
 
@@ -299,8 +299,8 @@ describe('di-core', () => {
       const injector = new Injector(new DependencyCollection([A, B, C2]));
       const c2 = injector.getOrInit(C2)!;
 
-      expect((c2.a as any).__propo__ === A.prototype);
-      expect((c2.b as any).__propo__ === B.prototype);
+      expect((c2.a as any).__proto__ === A.prototype).toBeTruthy();
+      expect((c2.b as any).__proto__ === B.prototype).toBeTruthy();
     });
   });
 });
