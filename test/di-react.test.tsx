@@ -1,5 +1,5 @@
 import { act, fireEvent, render } from '@testing-library/react';
-import React, { Component, useState } from 'react';
+import React, { Component, FunctionComponent, useState } from 'react';
 
 import {
   createIdentifier,
@@ -14,7 +14,7 @@ import {
 
 class Log {
   log(): string {
-    return '[WeDI]';
+    return 'wedi';
   }
 }
 
@@ -33,7 +33,7 @@ describe('di-react', () => {
       }
 
       const { container } = render(<App />);
-      expect(container.firstChild!.textContent).toBe('[WeDI]');
+      expect(container.firstChild!.textContent).toBe('wedi');
     });
 
     // it('should raise error when user tries to set dependency', () => {
@@ -46,7 +46,7 @@ describe('di-react', () => {
     //     @Inject(A) public a!: A;
 
     //     render() {
-    //       return <div onClick={() => (this.a = null as any)}>WeDI</div>;
+    //       return <div onClick={() => (this.a = null as any)}>wedi</div>;
     //     }
     //   }
 
@@ -59,7 +59,53 @@ describe('di-react', () => {
     //   }).toThrow();
     // });
 
-    it('should raise error when component context is not set to InjectionContext', () => {});
+    it('should raise error when component context is not set to InjectionContext', () => {
+      @Provide([Log])
+      class App extends Component {
+        @Inject(Log) private log!: Log;
+
+        render() {
+          return <div>{this.log.log()}</div>;
+        }
+      }
+
+      expect(() => render(<App></App>)).toThrow(
+        `[wedi] You should make "InjectorContext" as App's default context type. If you want to use multiple context, please check this page on React documentation. https://reactjs.org/docs/context.html#classcontexttype`
+      );
+    });
+
+    it('should raise error when injection is not optional and item is not provided', () => {
+      @Provide([])
+      class App extends Component {
+        static contextType = InjectionContext;
+
+        @Inject(Log) private log!: Log;
+
+        render() {
+          return <div>{this.log.log()}</div>;
+        }
+      }
+
+      expect(() => render(<App></App>)).toThrow(
+        '[wedi] Cannot get an instance of "Log".'
+      );
+    });
+
+    it('should tolerate when dependency is optional', () => {
+      @Provide([])
+      class App extends Component {
+        static contextType = InjectionContext;
+
+        @Inject(Log, true) private log!: Log;
+
+        render() {
+          return <div>{this.log?.log() || 'null'}</div>;
+        }
+      }
+
+      const { container } = render(<App />);
+      expect(container.firstElementChild!.textContent).toBe('null');
+    });
   });
 
   describe('functional component', () => {
@@ -107,6 +153,49 @@ describe('di-react', () => {
         return new Promise<undefined>((res) => setTimeout(res, 200));
       });
       expect(count).toBe(1);
+    });
+
+    it('should throw error when a dependency is not retrievable and not optional', () => {
+      function AppContainer() {
+        const collection = useCollection([]);
+
+        return (
+          <Provider collection={collection}>
+            <App></App>
+          </Provider>
+        );
+      }
+
+      function App() {
+        const log = useDependency(Log);
+
+        return <div>{log.log()}</div>;
+      }
+
+      expect(() => render(<AppContainer></AppContainer>)).toThrow(
+        `[wedi] Cannot get an instance of "Log".`
+      );
+    });
+
+    it('should tolerate when dependency is optional', () => {
+      function AppContainer() {
+        const collection = useCollection([]);
+
+        return (
+          <Provider collection={collection}>
+            <App></App>
+          </Provider>
+        );
+      }
+
+      function App() {
+        const log = useDependency(Log, true);
+
+        return <div>{log?.log() || 'wedi'}</div>;
+      }
+
+      const { container } = render(<AppContainer></AppContainer>);
+      expect(container.firstElementChild!.textContent).toBe('wedi');
     });
   });
 
@@ -162,42 +251,6 @@ describe('di-react', () => {
 
     const { container } = render(<Parent />);
     expect(container.firstElementChild?.textContent).toBe('B, C');
-  });
-
-  describe('optional injection', () => {
-    it('should raise error when injection is not optional and item is not provided', () => {
-      @Provide([])
-      class App extends Component {
-        static contextType = InjectionContext;
-
-        @Inject(Log) private log!: Log;
-
-        render() {
-          return <div>{this.log.log()}</div>;
-        }
-      }
-
-      // Weird that the test passes while leaving an uncaught error in the console...
-      expect(() => render(<App></App>)).toThrow(
-        '[WeDI] Cannot get an instance of "Log".'
-      );
-    });
-
-    it('should tolerate when injection is optional', () => {
-      @Provide([])
-      class App extends Component {
-        static contextType = InjectionContext;
-
-        @Inject(Log, true) private log!: Log;
-
-        render() {
-          return <div>{this.log?.log() || 'null'}</div>;
-        }
-      }
-
-      const { container } = render(<App />);
-      expect(container.firstElementChild!.textContent).toBe('null');
-    });
   });
 
   describe('should dispose', () => {
@@ -296,7 +349,7 @@ describe('di-react', () => {
   });
 
   it('should support inject React component', () => {
-    const IDropdown = createIdentifier<any>('dropdown');
+    const IDropdown = createIdentifier<FunctionComponent>('dropdown');
     const IConfig = createIdentifier<any>('config');
 
     const WebDropdown = function() {
@@ -306,12 +359,12 @@ describe('di-react', () => {
 
     @Provide([
       [IDropdown, { useValue: WebDropdown }],
-      [IConfig, { useValue: 'WeDI' }]
+      [IConfig, { useValue: 'wedi' }]
     ])
     class Header extends Component {
       static contextType = InjectionContext;
 
-      @Inject(IDropdown) private dropdown!: any;
+      @Inject(IDropdown) private dropdown!: FunctionComponent;
 
       render() {
         const Dropdown = this.dropdown;
@@ -320,6 +373,6 @@ describe('di-react', () => {
     }
 
     const { container } = render(<Header />);
-    expect(container.firstChild!.textContent).toBe('WeDropdown, WeDI');
+    expect(container.firstChild!.textContent).toBe('WeDropdown, wedi');
   });
 });

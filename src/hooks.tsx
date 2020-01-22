@@ -13,7 +13,7 @@ export function useCollection(
   entries?: DependencyItem<any>[]
 ): DependencyCollection {
   const collectionRef = useRef(new DependencyCollection(entries));
-  useEffect(() => () => collectionRef.current?.dispose(), []);
+  useEffect(() => () => collectionRef.current.dispose(), []);
   return collectionRef.current;
 }
 
@@ -35,7 +35,7 @@ export function useDependency<T>(
 
   if (!optional && !thing) {
     throw Error(
-      `[WeDI] cannot get an instance of ${getDependencyKeyName(key)}`
+      `[wedi] Cannot get an instance of "${getDependencyKeyName(key)}".`
     );
   }
 

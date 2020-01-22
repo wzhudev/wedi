@@ -13,7 +13,7 @@ export function registerSingleton<T>(
 
   if (index !== -1) {
     singletonDependencies[index] = [id, { useClass: ctor, lazyInstantiation }];
-    console.warn(`[WeDI] Duplicated registration of ${id.toString()}.`);
+    console.warn(`[wedi] Duplicated registration of ${id.toString()}.`);
   } else {
     singletonDependencies.push([id, { useClass: ctor, lazyInstantiation }]);
   }

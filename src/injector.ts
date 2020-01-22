@@ -111,7 +111,7 @@ export class Injector implements IDisposable {
 
       if (thing === null && !dependency.optional) {
         throw new Error(
-          `[WeDI] "${
+          `[wedi] "${
             theCtor.name
           }" relies on a not provided dependency "${getDependencyKeyName(
             dependency.id
@@ -158,7 +158,7 @@ export class Injector implements IDisposable {
       this.parent.putDependencyBack(key, value);
     } else {
       throw new Error(
-        `[WeDI] cannot find a place to to the new created ${getDependencyKeyName(
+        `[wedi] cannot find a place to to the new created ${getDependencyKeyName(
           key
         )}.`
       );

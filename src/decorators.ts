@@ -1,15 +1,5 @@
-import { Ctor, DependencyKey, Identifier } from './typings';
+import { Ctor, DependencyKey, Identifier, IdentifierSymbol } from './typings';
 import { dependencyIds, setDependencies } from './utils';
-
-function getDecoratorMisUsedError(
-  targetName: string,
-  identifierName: string
-): Error {
-  return new Error(
-    '[WeDI] dependency identifier can only be decorated on a constructor parameter. ' +
-      `Check ${identifierName} decorated on ${targetName}.`
-  );
-}
 
 export function createIdentifier<T>(name: string): Identifier<T> {
   if (dependencyIds.has(name)) {
@@ -19,15 +9,11 @@ export function createIdentifier<T>(name: string): Identifier<T> {
   }
 
   const id = function(target: Ctor<T>, _key: string, index: number): void {
-    if (arguments.length !== 3) {
-      throw getDecoratorMisUsedError(target.name, name);
-    }
-
     setDependencies(target, id, index, false);
   } as any;
 
   id.toString = () => name;
-  id.$$identifier = true;
+  id[IdentifierSymbol] = true; // Mark this as an identifier.
 
   dependencyIds.set(name, id);
 
@@ -39,10 +25,6 @@ export function createIdentifier<T>(name: string): Identifier<T> {
  */
 export function Optional<T>(key: DependencyKey<T>) {
   return function(target: Ctor<T>, _key: string, index: number) {
-    if (arguments.length !== 3) {
-      throw getDecoratorMisUsedError(target.name, key.toString());
-    }
-
     setDependencies(target, key, index, true);
   };
 }
@@ -52,10 +34,6 @@ export function Optional<T>(key: DependencyKey<T>) {
  */
 export function Need<T>(key: DependencyKey<T>) {
   return function<C>(target: Ctor<C>, _key: string, index: number) {
-    if (arguments.length !== 3) {
-      throw getDecoratorMisUsedError(target.name, key.constructor.name);
-    }
-
     setDependencies(target, key, index, false);
   };
 }

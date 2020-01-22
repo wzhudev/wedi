@@ -5,8 +5,10 @@ export interface Identifier<T = any> {
   type?: T;
 }
 
+export const IdentifierSymbol = Symbol('identifier');
+
 export function isIdentifier(thing: any): thing is Identifier {
-  return thing.$$identifier;
+  return thing[IdentifierSymbol];
 }
 
 export interface DependencyMeta<T> {
@@ -68,7 +70,6 @@ export type DependencyItem<T> = [Identifier<T>, DependencyValue<T>] | Ctor<T>;
 
 /**
  * Injector get disposed when the component it bound to destroys. At the moment,
- *
  */
 export interface IDisposable {
   dispose(): void;

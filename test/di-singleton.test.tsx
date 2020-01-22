@@ -23,7 +23,7 @@ interface Log {
 
 class A implements Log {
   log(): string {
-    return '[WeDI]';
+    return '[wedi]';
   }
 }
 
@@ -34,6 +34,7 @@ class B implements Log {
 }
 
 let initializationCounter = 0;
+
 class C {
   constructor() {
     initializationCounter += 1;
@@ -45,11 +46,8 @@ class C {
 }
 
 registerSingleton(id, A);
-
 registerSingleton(id2, A);
-
 registerSingleton(id2, B);
-
 registerSingleton(id3, C);
 
 describe('di-core-singleton', () => {
@@ -67,7 +65,7 @@ describe('di-core-singleton', () => {
 
     const { container } = render(<App />);
 
-    expect(container.firstChild!.textContent).toBe('[WeDI]');
+    expect(container.firstChild!.textContent).toBe('[wedi]');
   });
 
   it('should use the latest registered dependency', () => {
@@ -78,7 +76,6 @@ describe('di-core-singleton', () => {
       @Inject(id2) private log!: Log;
 
       render() {
-        console.log(this.log!);
         return <div>{this.log.log()}</div>;
       }
     }

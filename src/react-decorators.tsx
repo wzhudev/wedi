@@ -66,7 +66,7 @@ export function Inject<T>(
 
         if (!optional && !thing) {
           throw Error(
-            `[WeDI] Cannot get an instance of "${getDependencyKeyName(id)}".`
+            `[wedi] Cannot get an instance of "${getDependencyKeyName(id)}".`
           );
         }
 
@@ -74,7 +74,7 @@ export function Inject<T>(
       },
       set(_value: never) {
         throw Error(
-          `[WeDI] You can never set value to a dependency. Check "${propName}" of "${getDependencyKeyName(
+          `[wedi] You can never set value to a dependency. Check "${propName}" of "${getDependencyKeyName(
             id
           )}".`
         );
@@ -88,9 +88,9 @@ export function Inject<T>(
 function ensureInjectionContextExists(component: Component<any>): void {
   if (!component.context || !component.context.injector) {
     throw Error(
-      `You should make "InjectorContext" as ${component.constructor.name}'s default context type. ` +
+      `[wedi] You should make "InjectorContext" as ${component.constructor.name}'s default context type. ` +
         'If you want to use multiple context, please check this page on React documentation. ' +
-        'https://github.com/ant-design/ant-design'
+        'https://reactjs.org/docs/context.html#classcontexttype'
     );
   }
 }

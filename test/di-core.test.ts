@@ -7,6 +7,38 @@ import {
 } from '../src';
 
 describe('di-core', () => {
+  describe('create instance', () => {
+    class A {}
+
+    class B {
+      constructor(public p: any, @Need(A) public a: A) {}
+    }
+
+    const key = 'key';
+
+    it('should support extra parameters', () => {
+      const injector = new Injector(new DependencyCollection([A]));
+      const b = injector.createInstance(B, key);
+
+      expect(b.p).toBe(key);
+    });
+
+    it('should truncate extra parameters', () => {
+      const injector = new Injector(new DependencyCollection([A]));
+      const b = injector.createInstance(B, key, 'extra');
+
+      expect(b.p).toBe(key);
+      expect(b.a instanceof A).toBeTruthy();
+    });
+
+    it('should fill inadequate parameters with undefined', () => {
+      const injector = new Injector(new DependencyCollection([A]));
+      const b = injector.createInstance(B);
+
+      expect(b.p).toBe(undefined);
+    });
+  });
+
   describe('different kinds of dependencies', () => {
     class A {}
 
@@ -76,7 +108,7 @@ describe('di-core', () => {
       expect(injector.getOrInit(id)).toBeTruthy();
     });
 
-    it('should recursively init for Identifier-Factory', () => {
+    it('should recursively init for Identifier-useFactory', () => {
       const injector = new Injector(
         new DependencyCollection([
           [
@@ -172,7 +204,7 @@ describe('di-core', () => {
       }
 
       log(): string {
-        return '[WeDI]';
+        return '[wedi]';
       }
     }
 
@@ -199,7 +231,7 @@ describe('di-core', () => {
       expect(initFlag).toBeFalsy();
 
       const log = instance?.log();
-      expect(log).toBe('[WeDI]');
+      expect(log).toBe('[wedi]');
       expect(initFlag).toBeTruthy();
     });
 
@@ -225,7 +257,7 @@ describe('di-core', () => {
 
       injector.dispose();
       expect(() => injector.get(id)).toThrow(
-        '[WeDI] Dependency collection is not accessible after it disposes!'
+        '[wedi] Dependency collection is not accessible after it disposes!'
       );
     });
   });
@@ -249,7 +281,7 @@ describe('di-core', () => {
       const injector = new Injector(new DependencyCollection([B]));
 
       expect(() => injector.getOrInit(B)).toThrow(
-        '[WeDI] "B" relies on a not provided dependency "A".'
+        '[wedi] "B" relies on a not provided dependency "A".'
       );
     });
 
@@ -275,7 +307,7 @@ describe('di-core', () => {
       expect(() => {
         injector.getOrInit(id);
       }).toThrow(
-        `[WeDI] "createInstance" exceeds the limitation of recursion (10x). There might be a circular dependency among your dependency items. Last target was "a".`
+        `[wedi] "createInstance" exceeds the limitation of recursion (10x). There might be a circular dependency among your dependency items. Last target was "a".`
       );
     });
   });

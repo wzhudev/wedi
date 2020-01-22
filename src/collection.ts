@@ -56,7 +56,7 @@ export class DependencyCollection implements IDisposable {
   private ensureCollectionNotDisposed(): void {
     if (this.disposed) {
       throw new Error(
-        `[WeDI] Dependency collection is not accessible after it disposes!`
+        `[wedi] Dependency collection is not accessible after it disposes!`
       );
     }
   }
