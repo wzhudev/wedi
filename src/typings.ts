@@ -17,9 +17,6 @@ export interface DependencyMeta<T> {
   optional: boolean;
 }
 
-/**
- * @deprecated Use ClassItem instead.
- */
 export class InitPromise<T = any> {
   readonly ctor: any;
   readonly lazyInstantiation: boolean;
