@@ -65,9 +65,6 @@ export type DependencyKey<T> = Identifier<T> | Ctor<T>;
 
 export type DependencyItem<T> = [Identifier<T>, DependencyValue<T>] | Ctor<T>;
 
-/**
- * Injector get disposed when the component it bound to destroys. At the moment,
- */
 export interface IDisposable {
   dispose(): void;
 }
