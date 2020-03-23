@@ -1,6 +1,6 @@
 {
   "name": "wedi",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Wendell Hu <wendellhu95@gmail.com>",
   "description": "A lightweight dependency injection (DI) library for TypeScript, along with a binding for React.",
   "main": "./dist/index.js",
