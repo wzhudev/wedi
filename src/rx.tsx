@@ -30,11 +30,16 @@ export function useDependencyValue<T>(
   return value;
 }
 
+/**
+ * subscribe to a singal that emits whenever data updates and re-render
+ *
+ * @param update$ a signal that the data the functional component depends has updated
+ */
 export function useUpdateBinder(update$: Observable<void>): void {
-  const [, setCount] = useState(0);
+  const [, dumpSet] = useState(0);
 
   useEffect(() => {
-    const sub = update$.subscribe(() => setCount((prev) => prev + 1));
-    return () => sub.unsubscribe();
+    const subscription = update$.subscribe(() => dumpSet((prev) => prev + 1));
+    return () => subscription.unsubscribe();
   }, []);
 }
