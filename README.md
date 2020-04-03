@@ -2,6 +2,10 @@
 
 A lightweight dependency injection (DI) library for TypeScript, along with a binding for React.
 
+[![Codecov](https://img.shields.io/codecov/c/github/wendellhu95/wedi.svg?style=flat-square)](https://codecov.io/gh/wendellhu95/wedi)
+[![npm package](https://img.shields.io/npm/v/wedi.svg?style=flat-square)](https://www.npmjs.org/package/ng-zorro-antd)
+![GitHub license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)
+
 ---
 
 A TodoMVC [demo](https://wendellhu95.github.io/wedi-demo) built with wedi.
