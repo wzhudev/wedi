@@ -6,28 +6,28 @@ export interface IdleDeadline {
 export type DisposableCallback = () => void;
 
 /**
- * This run the callback when CPU is idle. Will fallback to setTimeout if
- * the browser doesn't support requestIdleCallback.
+ * this run the callback when CPU is idle. Will fallback to setTimeout if
+ * the browser doesn't support requestIdleCallback
  */
 export let runWhenIdle: (
   callback: (idle?: IdleDeadline) => void,
   timeout?: number
 ) => DisposableCallback;
 
-// Declare global variables because apparently the type file doesn't have it, for now.
+// declare global variables because apparently the type file doesn't have it, for now
 declare function requestIdleCallback(
   callback: (args: IdleDeadline) => void,
   options?: { timeout: number }
 ): number;
 declare function cancelIdleCallback(handle: number): void;
 
-// Use an IIFE to set up runWhenIdle
+// use an IIFE to set up runWhenIdle
 (function() {
   if (
     typeof requestIdleCallback !== 'undefined' &&
     typeof cancelIdleCallback !== 'undefined'
   ) {
-    // Use native requestIdleCallback.
+    // use native requestIdleCallback
     runWhenIdle = (runner, timeout?) => {
       const handle: number = requestIdleCallback(
         runner,
@@ -43,7 +43,7 @@ declare function cancelIdleCallback(handle: number): void;
       };
     };
   } else {
-    // Use setTimeout as hack.
+    // use setTimeout as hack
     const dummyIdle: IdleDeadline = Object.freeze({
       didTimeout: true,
       timeRemaining() {
@@ -64,10 +64,10 @@ declare function cancelIdleCallback(handle: number): void;
   }
 })();
 
-/**x
- * A wrapper of a executor so it can be evaluated when it's necessary or the CPU is idle.
+/**
+ * a wrapper of a executor so it can be evaluated when it's necessary or the CPU is idle
  *
- * The type of the returned value of the executor would be T.
+ * the type of the returned value of the executor would be T
  */
 export class IdleValue<T> {
   private readonly executor: () => void;

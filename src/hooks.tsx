@@ -6,7 +6,7 @@ import { DependencyItem, DependencyKey } from './typings';
 import { getDependencyKeyName } from './utils';
 
 /**
- * When providing dependencies in a functional component, it would be expensive
+ * when providing dependencies in a functional component, it would be expensive
  * (not to mention logic incorrectness)
  */
 export function useCollection(
@@ -18,8 +18,8 @@ export function useCollection(
 }
 
 /**
- * This function support using dependency injection in a function component
- * with the help of React Hooks.
+ * this function support using dependency injection in a function component
+ * with the help of React Hooks
  */
 export function useDependency<T>(key: DependencyKey<T>): T;
 export function useDependency<T>(

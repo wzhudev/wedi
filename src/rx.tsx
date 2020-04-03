@@ -1,20 +1,15 @@
-/**
- * This file contains some exploration of reactive programming and
- * dependency injection in React.
- */
-
 import { useEffect, useState } from 'react';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 /**
- * Unwrap an observable value, return it to the component for rendering, and
- * trigger re-render when value changes.
+ * unwrap an observable value, return it to the component for rendering, and
+ * trigger re-render when value changes
  *
  * **IMPORTANT**. Parent and child components should not subscribe to the same
  * observable, otherwise unnecessary re-render would be triggered. Instead, the
  * top-most component should subscribe and pass value of the observable to
  * its offspring, by props or context. Unlike Angular, React does not check
- * dirty values before updates.
+ * dirty values and mark as dirty before updates.
  */
 export function useDependencyValue<T>(
   depValue: Observable<T>,

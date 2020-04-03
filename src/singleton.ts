@@ -20,7 +20,7 @@ export function registerSingleton<T>(
 }
 
 /**
- * For top-layer injectors to fetch all singleton dependencies.
+ * for top-layer injectors to fetch all singleton dependencies
  */
 export function getSingletonDependencies(): [
   Identifier<any>,

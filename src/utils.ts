@@ -22,7 +22,7 @@ export function setDependencies<T>(
 ) {
   const meta: DependencyMeta<T> = { id, index, optional };
 
-  // Cope with dependency that is inherited from another.
+  // cope with dependency that is inherited from another
   if ((ctor as any)[TARGET] === ctor) {
     (ctor as any)[DEPENDENCIES].push(meta);
   } else {

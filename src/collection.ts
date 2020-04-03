@@ -13,18 +13,18 @@ export class DependencyCollection implements IDisposable {
 
   constructor(deps: DependencyItem<any>[] = []) {
     for (const dep of deps) {
-      // IdentifierPair
+      // identifier pair
       if (dep instanceof Array) {
         const [depKey, depItem] = dep;
         this.add(depKey, depItem);
       } else {
-        // The constructor itself.
+        // the constructor itself
         this.add(dep, new InitPromise(dep));
       }
     }
   }
 
-  /* Register a dependency with an identifier. */
+  /* register a dependency with an identifier */
   add<T>(key: DependencyKey<T>, depItem: any): void {
     this.ensureCollectionNotDisposed();
     this.items.set(key, depItem);
@@ -40,9 +40,6 @@ export class DependencyCollection implements IDisposable {
     return this.items.get(key);
   }
 
-  /**
-   * If this collection get disposed
-   */
   dispose(): void {
     this.disposed = true;
 

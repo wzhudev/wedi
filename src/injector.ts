@@ -25,7 +25,7 @@ export class Injector implements IDisposable {
   private readonly collection: DependencyCollection;
 
   constructor(collection: DependencyCollection, parent?: Injector) {
-    // If there's no parent injector, should get singleton dependencies.
+    // if there's no parent injector, should get singleton dependencies
     if (!parent) {
       const newDependencies = getSingletonDependencies();
       newDependencies.forEach((d) => {
@@ -44,7 +44,7 @@ export class Injector implements IDisposable {
   }
 
   /**
-   * Create a child Initializer to build layered injection system.
+   * create a child Initializer to build layered injection system
    */
   createChild(
     dependencies: DependencyCollection = new DependencyCollection()
@@ -53,16 +53,16 @@ export class Injector implements IDisposable {
   }
 
   /**
-   * Get a dependency.
+   * get a dependency
    */
   get<T>(id: DependencyKey<T>): T | null {
     const thing = this.getDependencyOrIdentifierPair(id);
 
     if (typeof thing === 'undefined') {
-      // Not provided.
+      // not provided
       return null;
     } else if (thing instanceof InitPromise || isFactoryItem(thing)) {
-      // Not initialized yet.
+      // not initialized yet
       return null;
     } else {
       return this.getOrInit(id);
@@ -70,7 +70,7 @@ export class Injector implements IDisposable {
   }
 
   /**
-   * Get a dependency or create one in the current injector.
+   * get a dependency or create one in the current injector
    */
   getOrInit<T>(id: DependencyKey<T>): T | null {
     const thing = this.getDependencyOrIdentifierPair(id);
@@ -94,8 +94,8 @@ export class Injector implements IDisposable {
   }
 
   /**
-   * Initialize a class in the scope of the injector.
-   * @param ctor The class to be initialized.
+   * initialize a class in the scope of the injector
+   * @param ctor The class to be initialized
    */
   createInstance<T>(ctor: Ctor<T> | InitPromise<T>, ...extraParams: any[]): T {
     const theCtor = ctor instanceof InitPromise ? ctor.ctor : ctor;

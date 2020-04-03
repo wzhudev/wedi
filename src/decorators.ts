@@ -13,7 +13,7 @@ export function createIdentifier<T>(name: string): Identifier<T> {
   } as any;
 
   id.toString = () => name;
-  id[IdentifierSymbol] = true; // Mark this as an identifier.
+  id[IdentifierSymbol] = true; // mark this as an identifier
 
   dependencyIds.set(name, id);
 
@@ -21,7 +21,7 @@ export function createIdentifier<T>(name: string): Identifier<T> {
 }
 
 /**
- * Wrap a Identifier with this function to make it optional.
+ * wrap a Identifier with this function to make it optional
  */
 export function Optional<T>(key: DependencyKey<T>) {
   return function(target: Ctor<T>, _key: string, index: number) {
@@ -30,7 +30,7 @@ export function Optional<T>(key: DependencyKey<T>) {
 }
 
 /**
- * Used inside constructor for services to claim dependencies.
+ * used inside constructor for services to claim dependencies
  */
 export function Need<T>(key: DependencyKey<T>) {
   return function<C>(target: Ctor<C>, _key: string, index: number) {

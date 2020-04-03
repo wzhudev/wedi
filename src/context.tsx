@@ -20,8 +20,9 @@ export interface InjectionProviderProps {
 }
 
 /**
- * The React binding of wedi. It uses the React context API to specify
- * injection positions and layered injector tree.
+ * the React binding of wedi
+ *
+ * it uses the React context API to specify injection positions and layered injector tree
  *
  * ```tsx
  * <Provider collection={}>

@@ -7,8 +7,8 @@ import { Ctor, DependencyItem, Identifier } from './typings';
 import { getDependencyKeyName } from './utils';
 
 /**
- * An decorator that could be used on a React class component. To provide a
- * injection context on that component.
+ * an decorator that could be used on a React class component
+ * to provide a injection context on that component
  */
 export function Provide(items: DependencyItem<any>[]) {
   return function(target: any): any {
@@ -44,8 +44,8 @@ export function Provide(items: DependencyItem<any>[]) {
 }
 
 /**
- * Returns decorator that could be used on a property of
- * a React class component to inject a dependency.
+ * returns decorator that could be used on a property of
+ * a React class component to inject a dependency
  */
 export function Inject<T>(
   id: Identifier<T> | Ctor<T>,
@@ -53,8 +53,8 @@ export function Inject<T>(
 ) {
   return function(target: any, propName: string, _originDescriptor?: any): any {
     const descriptor = {
-      // When user is trying to get the service, get it from the injector in
-      // the current context.
+      // when user is trying to get the service, get it from the injector in
+      // the current context
       get(): T | null {
         // tslint:disable-next-line:no-invalid-this
         const thisAsComponent: Component<any> = this as any;

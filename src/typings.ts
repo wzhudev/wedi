@@ -26,8 +26,6 @@ export class InitPromise<T = any> {
   }
 }
 
-// Actually InitPromise would be used internally.
-
 export interface ClassItem<T> {
   useClass: Ctor<T>;
   lazyInstantiation?: boolean;
