@@ -28,6 +28,7 @@
     "@types/webpack": "^4.4.23",
     "@types/webpack-env": "1.13.6",
     "@zeit/ncc": "^0.21.0",
+    "codecov": "^3.5.0",
     "jest": "^24.9.0",
     "prettier": "^1.19.1",
     "react": "^16.8.1",

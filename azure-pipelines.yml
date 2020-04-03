@@ -40,3 +40,4 @@ stages:
               command: 'install'
           - script: |
               npm run test
+              cat ./coverage-report/lcov.info | ./node_modules/.bin/codecov
