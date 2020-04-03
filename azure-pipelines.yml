@@ -39,7 +39,7 @@ stages:
             inputs:
               command: "install"
           - script: |
-              npm run tes
+              npm run test
               cat ./coverage-report/lcov.info | ./node_modules/.bin/codecovt
 
           - task: PublishCodeCoverageResults@1
