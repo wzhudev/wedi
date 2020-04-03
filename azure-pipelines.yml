@@ -40,7 +40,7 @@ stages:
               command: "install"
           - script: |
               npm run test
-              cat ./coverage-report/lcov.info | ./node_modules/.bin/codecovt
+              cat ./coverage-report/lcov.info | ./node_modules/.bin/codecov
 
           - task: PublishCodeCoverageResults@1
             displayName: "publish code coverage results"
