@@ -7,7 +7,7 @@ trigger:
   - master
 
 pool:
-  vmImage: "ubuntu-latest"
+  vmImage: 'ubuntu-latest'
 
 stages:
   - stage: env
@@ -16,8 +16,8 @@ stages:
         steps:
           - task: NodeTool@0
             inputs:
-              versionSpec: "12.13.1"
-            displayName: "Install Node.js"
+              versionSpec: '12.13.1'
+            displayName: 'Install Node.js'
 
   - stage: build
     dependsOn: env
@@ -26,7 +26,7 @@ stages:
         steps:
           - task: Npm@1
             inputs:
-              command: "install"
+              command: 'install'
           - script: |
               npm run build
 
@@ -37,13 +37,13 @@ stages:
         steps:
           - task: Npm@1
             inputs:
-              command: "install"
+              command: 'install'
           - script: |
               npm run test
-              cat ./coverage-report/lcov.info | ./node_modules/.bin/codecovt
+              cat ./coverage-report/lcov.info | ./node_modules/.bin/codecov
 
           - task: PublishCodeCoverageResults@1
-            displayName: "publish code coverage results"
+            displayName: 'publish code coverage results'
             condition: succeededOrFailed()
             inputs:
               codeCoverageTool: Cobertura
