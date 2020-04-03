@@ -3,7 +3,7 @@
 A lightweight dependency injection (DI) library for TypeScript, along with a binding for React.
 
 [![Codecov](https://img.shields.io/codecov/c/github/wendellhu95/wedi.svg?style=flat-square)](https://codecov.io/gh/wendellhu95/wedi)
-[![npm package](https://img.shields.io/npm/v/wedi.svg?style=flat-square)](https://www.npmjs.org/package/ng-zorro-antd)
+[![npm package](https://img.shields.io/npm/v/wedi.svg?style=flat-square)](https://www.npmjs.org/package/wedi)
 ![GitHub license](https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square)
 
 ---
