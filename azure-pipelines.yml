@@ -41,12 +41,3 @@ stages:
           - script: |
               npm run test
               cat ./coverage-report/lcov.info | ./node_modules/.bin/codecov
-
-          - task: PublishCodeCoverageResults@1
-            displayName: 'publish code coverage results'
-            condition: succeededOrFailed()
-            inputs:
-              codeCoverageTool: Cobertura
-              summaryFileLocation: $(System.DefaultWorkingDirectory)/coverage-report/cobertura-coverage.xml
-              reportDirectory: $(System.DefaultWorkingDirectory)/coverage-report
-              failIfCoverageEmpty: true
