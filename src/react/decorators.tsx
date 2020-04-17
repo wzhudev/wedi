@@ -1,10 +1,10 @@
 import React, { Component, ComponentClass, createElement } from 'react';
 
-import { DependencyCollection } from './collection';
+import { DependencyCollection } from '../collection';
+import { Injector } from '../injector';
+import { Ctor, DependencyItem, Identifier } from '../typings';
+import { getDependencyKeyName } from '../utils';
 import { Provider } from './context';
-import { Injector } from './injector';
-import { Ctor, DependencyItem, Identifier } from './typings';
-import { getDependencyKeyName } from './utils';
 
 /**
  * an decorator that could be used on a React class component

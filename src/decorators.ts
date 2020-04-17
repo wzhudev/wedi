@@ -1,23 +1,23 @@
-import { Ctor, DependencyKey, Identifier, IdentifierSymbol } from './typings';
-import { dependencyIds, setDependencies } from './utils';
+import { Ctor, DependencyKey, Identifier, IdentifierSymbol } from './typings'
+import { dependencyIds, setDependencies } from './utils'
 
 export function createIdentifier<T>(name: string): Identifier<T> {
   if (dependencyIds.has(name)) {
-    console.warn(`[DI] duplicated identifier name ${name}.`);
+    console.warn(`[DI] duplicated identifier name ${name}.`)
 
-    return dependencyIds.get(name)!;
+    return dependencyIds.get(name)!
   }
 
   const id = function(target: Ctor<T>, _key: string, index: number): void {
-    setDependencies(target, id, index, false);
-  } as any;
+    setDependencies(target, id, index, false)
+  } as any
 
-  id.toString = () => name;
-  id[IdentifierSymbol] = true; // mark this as an identifier
+  id.toString = () => name
+  id[IdentifierSymbol] = true // mark this as an identifier
 
-  dependencyIds.set(name, id);
+  dependencyIds.set(name, id)
 
-  return id;
+  return id
 }
 
 /**
@@ -25,8 +25,8 @@ export function createIdentifier<T>(name: string): Identifier<T> {
  */
 export function Optional<T>(key: DependencyKey<T>) {
   return function(target: Ctor<T>, _key: string, index: number) {
-    setDependencies(target, key, index, true);
-  };
+    setDependencies(target, key, index, true)
+  }
 }
 
 /**
@@ -34,6 +34,6 @@ export function Optional<T>(key: DependencyKey<T>) {
  */
 export function Need<T>(key: DependencyKey<T>) {
   return function<C>(target: Ctor<C>, _key: string, index: number) {
-    setDependencies(target, key, index, false);
-  };
+    setDependencies(target, key, index, false)
+  }
 }

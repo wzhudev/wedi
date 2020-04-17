@@ -1,7 +1,7 @@
-import { fireEvent, render } from '@testing-library/react';
-import React, { Component, useState } from 'react';
+import { fireEvent, render } from '@testing-library/react'
+import React, { Component, useState } from 'react'
 
-import { act } from 'react-dom/test-utils';
+import { act } from 'react-dom/test-utils'
 import {
   createIdentifier,
   Inject,
@@ -11,84 +11,84 @@ import {
   registerSingleton,
   useCollection,
   useDependency
-} from '../src';
+} from '../src'
 
-const id = createIdentifier('a');
-const id2 = createIdentifier('b');
-const id3 = createIdentifier('c');
+const id = createIdentifier('a')
+const id2 = createIdentifier('b')
+const id3 = createIdentifier('c')
 
 interface Log {
-  log(): string;
+  log(): string
 }
 
 class A implements Log {
   log(): string {
-    return '[wedi]';
+    return '[wedi]'
   }
 }
 
 class B implements Log {
   log(): string {
-    return '[WePuppy]';
+    return '[WePuppy]'
   }
 }
 
-let initializationCounter = 0;
+let initializationCounter = 0
 
 class C {
   constructor() {
-    initializationCounter += 1;
+    initializationCounter += 1
   }
 
   getCounter(): number {
-    return initializationCounter;
+    return initializationCounter
   }
 }
 
-registerSingleton(id, A);
-registerSingleton(id2, A);
-registerSingleton(id2, B);
-registerSingleton(id3, C);
+registerSingleton(id, A)
+registerSingleton(id2, A)
+registerSingleton(id2, B)
+registerSingleton(id3, C)
 
 describe('di-core-singleton', () => {
   it('should singleton work', () => {
     @Provide([])
     class App extends Component {
-      static contextType = InjectionContext;
+      static contextType = InjectionContext
 
-      @Inject(id) private log!: Log;
+      @Inject(id) private log!: Log
 
       render() {
-        return <div>{this.log.log()}</div>;
+        return <div>{this.log.log()}</div>
       }
     }
 
-    const { container } = render(<App />);
+    const { container } = render(<App />)
 
-    expect(container.firstChild!.textContent).toBe('[wedi]');
-  });
+    expect(container.firstChild!.textContent).toBe('[wedi]')
+  })
 
   it('should use the latest registered dependency', () => {
     @Provide([])
     class App extends Component {
-      static contextType = InjectionContext;
+      static contextType = InjectionContext
 
-      @Inject(id2) private log!: Log;
+      @Inject(id2) private log!: Log
 
       render() {
-        return <div>{this.log.log()}</div>;
+        return <div>{this.log.log()}</div>
       }
     }
 
-    const { container } = render(<App />);
+    const { container } = render(<App />)
 
-    expect(container.firstChild!.textContent).toBe('[WePuppy]');
-  });
+    expect(container.firstChild!.textContent).toBe('[WePuppy]')
+  })
 
   it('should singleton work with root injector in functional component', async () => {
     function App() {
-      const [count, setCount] = useState(0);
-      const collection = useCollection();
+      const [count, setCount] = useState(0)
+      const collection = useCollection()
 
       return (
         <Provider collection={collection}>
@@ -97,24 +97,24 @@ describe('di-core-singleton', () => {
             <Child></Child>
           </div>
         </Provider>
-      );
+      )
     }
 
     function Child() {
-      const c = useDependency(id3) as C;
+      const c = useDependency(id3) as C
 
-      return <>, {c.getCounter()}</>;
+      return <>, {c.getCounter()}</>
     }
 
-    const { container } = render(<App></App>);
+    const { container } = render(<App></App>)
 
-    expect(container.firstChild!.textContent).toBe('0, 1');
+    expect(container.firstChild!.textContent).toBe('0, 1')
 
     await act(() => {
-      fireEvent.click(container.firstElementChild!);
-      return new Promise<void>((res) => setTimeout(res, 20));
-    });
+      fireEvent.click(container.firstElementChild!)
+      return new Promise<void>((res) => setTimeout(res, 20))
+    })
 
-    expect(container.firstChild!.textContent).toBe('1, 1');
-  });
-});
+    expect(container.firstChild!.textContent).toBe('1, 1')
+  })
+})

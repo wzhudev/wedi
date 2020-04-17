@@ -1,9 +1,9 @@
 import { useContext, useEffect, useRef } from 'react';
 
-import { DependencyCollection } from './collection';
+import { DependencyCollection } from '../collection';
+import { DependencyItem, DependencyKey } from '../typings';
+import { getDependencyKeyName } from '../utils';
 import { InjectionContext } from './context';
-import { DependencyItem, DependencyKey } from './typings';
-import { getDependencyKeyName } from './utils';
 
 /**
  * when providing dependencies in a functional component, it would be expensive

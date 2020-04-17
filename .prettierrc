@@ -1,6 +1,6 @@
 {
   "arrowParens": "always",
-  "semi": true,
+  "semi": false,
   "useTabs": false,
   "tabWidth": 2,
   "bracketSpacing": true,

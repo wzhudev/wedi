@@ -1,6 +1,6 @@
-import { DependencyCollection } from './collection';
-import { IdleValue } from './idle';
-import { getSingletonDependencies } from './singleton';
+import { DependencyCollection } from './collection'
+import { IdleValue } from './idle'
+import { getSingletonDependencies } from './singleton'
 import {
   Ctor,
   DependencyKey,
@@ -11,36 +11,38 @@ import {
   isClassItem,
   isFactoryItem,
   isValueItem
-} from './typings';
+} from './typings'
 import {
   assertRecursionNotTrappedInACircle,
   completeInitialization,
   getDependencies,
   getDependencyKeyName,
   requireInitialization
-} from './utils';
+} from './utils'
 
 export class Injector implements IDisposable {
-  private readonly parent?: Injector;
-  private readonly collection: DependencyCollection;
+  private readonly parent?: Injector
+  private readonly collection: DependencyCollection
 
   constructor(collection: DependencyCollection, parent?: Injector) {
     // if there's no parent injector, should get singleton dependencies
     if (!parent) {
-      const newDependencies = getSingletonDependencies();
+      const newDependencies = getSingletonDependencies()
+      // root injector would not re-add dependencies when the component
+      // it embeds re-render
       newDependencies.forEach((d) => {
         if (!collection.has(d[0])) {
-          collection.add(d[0], d[1]);
+          collection.add(d[0], d[1])
         }
-      });
+      })
     }
 
-    this.collection = collection;
-    this.parent = parent;
+    this.collection = collection
+    this.parent = parent
   }
 
   dispose(): void {
-    this.collection.dispose();
+    this.collection.dispose()
   }
 
   /**
@@ -49,23 +51,23 @@ export class Injector implements IDisposable {
   createChild(
     dependencies: DependencyCollection = new DependencyCollection()
   ): Injector {
-    return new Injector(dependencies, this);
+    return new Injector(dependencies, this)
   }
 
   /**
    * get a dependency
    */
   get<T>(id: DependencyKey<T>): T | null {
-    const thing = this.getDependencyOrIdentifierPair(id);
+    const thing = this.getDependencyOrIdentifierPair(id)
 
     if (typeof thing === 'undefined') {
       // not provided
-      return null;
+      return null
     } else if (thing instanceof InitPromise || isFactoryItem(thing)) {
       // not initialized yet
-      return null;
+      return null
     } else {
-      return this.getOrInit(id);
+      return this.getOrInit(id)
     }
   }
 
@@ -73,23 +75,23 @@ export class Injector implements IDisposable {
    * get a dependency or create one in the current injector
    */
   getOrInit<T>(id: DependencyKey<T>): T | null {
-    const thing = this.getDependencyOrIdentifierPair(id);
+    const thing = this.getDependencyOrIdentifierPair(id)
 
     if (typeof thing === 'undefined') {
-      return null;
+      return null
     } else if (thing instanceof InitPromise) {
-      return this.createAndCacheInstance(id, thing);
+      return this.createAndCacheInstance(id, thing)
     } else if (isValueItem(thing)) {
-      return thing.useValue;
+      return thing.useValue
     } else if (isFactoryItem(thing)) {
-      return this.invokeDependencyFactory(id, thing);
+      return this.invokeDependencyFactory(id, thing)
     } else if (isClassItem(thing)) {
       return this.createAndCacheInstance(
         id,
         new InitPromise(thing.useClass, !!thing.lazyInstantiation)
-      );
+      )
     } else {
-      return thing as T;
+      return thing as T
     }
   }
 
@@ -98,16 +100,16 @@ export class Injector implements IDisposable {
    * @param ctor The class to be initialized
    */
   createInstance<T>(ctor: Ctor<T> | InitPromise<T>, ...extraParams: any[]): T {
-    const theCtor = ctor instanceof InitPromise ? ctor.ctor : ctor;
+    const theCtor = ctor instanceof InitPromise ? ctor.ctor : ctor
     const dependencies = getDependencies(theCtor).sort(
       (a, b) => a.index - b.index
-    );
-    const resolvedArgs: any[] = [];
+    )
+    const resolvedArgs: any[] = []
 
-    let args = [...extraParams];
+    let args = [...extraParams]
 
     for (const dependency of dependencies) {
-      const thing = this.getOrInit(dependency.id);
+      const thing = this.getOrInit(dependency.id)
 
       if (thing === null && !dependency.optional) {
         throw new Error(
@@ -116,30 +118,30 @@ export class Injector implements IDisposable {
           }" relies on a not provided dependency "${getDependencyKeyName(
             dependency.id
           )}".`
-        );
+        )
       }
 
-      resolvedArgs.push(thing);
+      resolvedArgs.push(thing)
     }
 
     const firstDependencyArgIndex =
-      dependencies.length > 0 ? dependencies[0].index : args.length;
+      dependencies.length > 0 ? dependencies[0].index : args.length
 
     if (args.length !== firstDependencyArgIndex) {
       console.warn(
         `[DI] expected ${firstDependencyArgIndex} non-injected parameters ` +
           `but ${args.length} parameters are provided.`
-      );
+      )
 
-      const delta = firstDependencyArgIndex - args.length;
+      const delta = firstDependencyArgIndex - args.length
       if (delta > 0) {
-        args = [...args, ...new Array(delta).fill(undefined)];
+        args = [...args, ...new Array(delta).fill(undefined)]
       } else {
-        args = args.slice(0, firstDependencyArgIndex);
+        args = args.slice(0, firstDependencyArgIndex)
       }
     }
 
-    return new theCtor(...args, ...resolvedArgs);
+    return new theCtor(...args, ...resolvedArgs)
   }
 
   private getDependencyOrIdentifierPair<T>(
@@ -148,20 +150,20 @@ export class Injector implements IDisposable {
     return (
       this.collection.get(id) ||
       (this.parent ? this.parent.getDependencyOrIdentifierPair(id) : undefined)
-    );
+    )
   }
 
   private putDependencyBack<T>(key: DependencyKey<T>, value: T): void {
     if (this.collection.get(key)) {
-      this.collection.add(key, value);
+      this.collection.add(key, value)
     } else if (this.parent) {
-      this.parent.putDependencyBack(key, value);
+      this.parent.putDependencyBack(key, value)
     } else {
       throw new Error(
         `[wedi] cannot find a place to to the new created ${getDependencyKeyName(
           key
-        )}.`
-      );
+        )}`
+      )
     }
   }
 
@@ -169,57 +171,57 @@ export class Injector implements IDisposable {
     dKey: DependencyKey<T>,
     initPromise: InitPromise<T>
   ) {
-    requireInitialization();
-    assertRecursionNotTrappedInACircle(dKey);
+    requireInitialization()
+    assertRecursionNotTrappedInACircle(dKey)
 
-    const ctor = initPromise.ctor;
-    let thing: T;
+    const ctor = initPromise.ctor
+    let thing: T
 
     if (initPromise.lazyInstantiation) {
-      const idle = new IdleValue<T>(() => this.doCreateInstance(dKey, ctor));
+      const idle = new IdleValue<T>(() => this.doCreateInstance(dKey, ctor))
       thing = new Proxy(Object.create(null), {
         get(target: any, key: string | number | symbol): any {
           if (key in target) {
-            return target[key];
+            return target[key]
           }
-          const obj = idle.getValue();
-          let prop = (obj as any)[key];
+          const obj = idle.getValue()
+          let prop = (obj as any)[key]
           if (typeof prop !== 'function') {
-            return prop;
+            return prop
           }
-          prop = prop.bind(obj);
-          target[key] = prop;
-          return prop;
+          prop = prop.bind(obj)
+          target[key] = prop
+          return prop
         },
         set(_target: any, key: string | number | symbol, value: any): boolean {
-          (idle.getValue() as any)[key] = value;
-          return true;
+          ;(idle.getValue() as any)[key] = value
+          return true
         }
-      }) as T;
+      }) as T
     } else {
-      thing = this.doCreateInstance(dKey, ctor);
+      thing = this.doCreateInstance(dKey, ctor)
     }
 
-    completeInitialization();
+    completeInitialization()
 
-    return thing;
+    return thing
   }
 
   private doCreateInstance<T>(id: DependencyKey<T>, ctor: Ctor<T>): T {
-    const thing = this.createInstance(ctor);
-    this.putDependencyBack(id, thing);
-    return thing;
+    const thing = this.createInstance(ctor)
+    this.putDependencyBack(id, thing)
+    return thing
   }
 
   private invokeDependencyFactory<T>(
     id: DependencyKey<T>,
     factory: FactoryItem<T>
   ): T {
-    const dependencies = factory.deps?.map((dp) => this.getOrInit(dp)) || [];
-    const thing = factory.useFactory.call(null, dependencies);
+    const dependencies = factory.deps?.map((dp) => this.getOrInit(dp)) || []
+    const thing = factory.useFactory.call(null, dependencies)
 
-    this.collection.add(id, thing);
+    this.collection.add(id, thing)
 
-    return thing;
+    return thing
   }
 }

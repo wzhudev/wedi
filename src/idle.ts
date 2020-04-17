@@ -1,9 +1,9 @@
 export interface IdleDeadline {
-  readonly didTimeout: boolean;
-  timeRemaining(): DOMHighResTimeStamp;
+  readonly didTimeout: boolean
+  timeRemaining(): DOMHighResTimeStamp
 }
 
-export type DisposableCallback = () => void;
+export type DisposableCallback = () => void
 
 /**
  * this run the callback when CPU is idle. Will fallback to setTimeout if
@@ -12,17 +12,17 @@ export type DisposableCallback = () => void;
 export let runWhenIdle: (
   callback: (idle?: IdleDeadline) => void,
   timeout?: number
-) => DisposableCallback;
+) => DisposableCallback
 
 // declare global variables because apparently the type file doesn't have it, for now
 declare function requestIdleCallback(
   callback: (args: IdleDeadline) => void,
   options?: { timeout: number }
-): number;
-declare function cancelIdleCallback(handle: number): void;
+): number
+declare function cancelIdleCallback(handle: number): void
 
 // use an IIFE to set up runWhenIdle
-(function() {
+;(function() {
   if (
     typeof requestIdleCallback !== 'undefined' &&
     typeof cancelIdleCallback !== 'undefined'
@@ -32,37 +32,37 @@ declare function cancelIdleCallback(handle: number): void;
       const handle: number = requestIdleCallback(
         runner,
         typeof timeout === 'number' ? { timeout } : undefined
-      );
-      let disposed = false;
+      )
+      let disposed = false
       return () => {
         if (disposed) {
-          return;
+          return
         }
-        disposed = true;
-        clearTimeout(handle);
-      };
-    };
+        disposed = true
+        clearTimeout(handle)
+      }
+    }
   } else {
     // use setTimeout as hack
     const dummyIdle: IdleDeadline = Object.freeze({
       didTimeout: true,
       timeRemaining() {
-        return 15;
+        return 15
       }
-    });
+    })
     runWhenIdle = (runner) => {
-      const handle = setTimeout(() => runner(dummyIdle));
-      let disposed = false;
+      const handle = setTimeout(() => runner(dummyIdle))
+      let disposed = false
       return () => {
         if (disposed) {
-          return;
+          return
         }
-        disposed = true;
-        clearTimeout(handle);
-      };
-    };
+        disposed = true
+        clearTimeout(handle)
+      }
+    }
   }
-})();
+})()
 
 /**
  * a wrapper of a executor so it can be evaluated when it's necessary or the CPU is idle
@@ -70,38 +70,38 @@ declare function cancelIdleCallback(handle: number): void;
  * the type of the returned value of the executor would be T
  */
 export class IdleValue<T> {
-  private readonly executor: () => void;
-  private value?: T;
+  private readonly executor: () => void
+  private value?: T
 
-  private didRun: boolean = false;
-  private error?: Error;
-  private readonly disposeCallback: () => void;
+  private didRun: boolean = false
+  private error?: Error
+  private readonly disposeCallback: () => void
 
   constructor(executor: () => T) {
     this.executor = () => {
       try {
-        this.value = executor();
+        this.value = executor()
       } catch (err) {
-        this.error = err;
+        this.error = err
       } finally {
-        this.didRun = true;
+        this.didRun = true
       }
-    };
-    this.disposeCallback = runWhenIdle(() => this.executor());
+    }
+    this.disposeCallback = runWhenIdle(() => this.executor())
   }
 
   dispose(): void {
-    this.disposeCallback();
+    this.disposeCallback()
   }
 
   getValue(): T {
     if (!this.didRun) {
-      this.dispose();
-      this.executor();
+      this.dispose()
+      this.executor()
     }
     if (this.error) {
-      throw this.error;
+      throw this.error
     }
-    return this.value!;
+    return this.value!
   }
 }
