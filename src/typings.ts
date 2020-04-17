@@ -20,6 +20,7 @@ export interface DependencyMeta<T> {
 export class InitPromise<T = any> {
   readonly ctor: any
   readonly lazyInstantiation: boolean
+
   constructor(ctor: Ctor<T>, lazyInstantiation: boolean = false) {
     this.ctor = ctor
     this.lazyInstantiation = lazyInstantiation
