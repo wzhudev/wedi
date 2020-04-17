@@ -1,5 +1,7 @@
 import { ClassItem, Ctor, Identifier } from './typings'
 
+let singletonDependenciesHaveBeenFetched = false
+
 const singletonDependencies: [Identifier<any>, ClassItem<any>][] = []
 
 export function registerSingleton<T>(
@@ -26,5 +28,14 @@ export function getSingletonDependencies(): [
   Identifier<any>,
   ClassItem<any>
 ][] {
+  if (singletonDependenciesHaveBeenFetched) {
+    console.warn(
+      '[wedi] More than one root injectors tried to fetch singleton dependencies. ' +
+        'This may cause undesired behavior in your application.'
+    )
+  }
+
+  singletonDependenciesHaveBeenFetched = true
+
   return singletonDependencies
 }
