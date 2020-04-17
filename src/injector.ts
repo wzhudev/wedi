@@ -6,7 +6,7 @@ import {
   DependencyKey,
   DependencyValue,
   FactoryItem,
-  IDisposable,
+  Disposable,
   InitPromise,
   isClassItem,
   isFactoryItem,
@@ -20,7 +20,7 @@ import {
   requireInitialization
 } from './utils'
 
-export class Injector implements IDisposable {
+export class Injector implements Disposable {
   private readonly parent?: Injector
   private readonly collection: DependencyCollection
 

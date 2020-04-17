@@ -12,7 +12,7 @@ export {
   isFactoryItem,
   DependencyValue,
   DependencyItem,
-  IDisposable,
+  Disposable,
   isDisposable
 } from './typings'
 

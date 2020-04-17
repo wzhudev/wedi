@@ -64,10 +64,10 @@ export type DependencyKey<T> = Identifier<T> | Ctor<T>
 
 export type DependencyItem<T> = [Identifier<T>, DependencyValue<T>] | Ctor<T>
 
-export interface IDisposable {
+export interface Disposable {
   dispose(): void
 }
 
-export function isDisposable(thing: any): thing is IDisposable {
+export function isDisposable(thing: any): thing is Disposable {
   return !!(thing as any).dispose
 }

@@ -2,12 +2,12 @@ import {
   DependencyItem,
   DependencyKey,
   DependencyValue,
-  IDisposable,
+  Disposable,
   InitPromise,
   isDisposable
 } from './typings'
 
-export class DependencyCollection implements IDisposable {
+export class DependencyCollection implements Disposable {
   private readonly items = new Map<DependencyKey<any>, DependencyValue<any>>()
   private disposed: boolean = false
 
