@@ -46,14 +46,14 @@ When you provide a dependency item, you're actually injecting a pair of key & va
 `key` could be a class, or an identifier returned by `createIdentifier`.
 
 ```ts
-import { createIdentifier } from 'wedi';
+import { createIdentifier } from 'wedi'
 
 export interface IPlatform {
   // properties
   // methods
 }
 
-export const IPlatformService = createIdentifier<IPlatformService>('platform');
+export const IPlatformService = createIdentifier<IPlatformService>('platform')
 ```
 
 You can use the same name for a variable and a type in TypeScript. Personally, I recommend to use `I` as prefix.
@@ -95,7 +95,7 @@ If `OptionalDependency` is not provided, wedi would not throw an error but use a
 It's easy to provide a value as dependency.
 
 ```ts
-const configDep = [IConfig, { useValue: '2020' }];
+const configDep = [IConfig, { useValue: '2020' }]
 ```
 
 #### Factory Function as a Dependency Item
@@ -127,7 +127,7 @@ const dependencies = [
     }
   ],
   [IHTTPService, WebHTTPService]
-];
+]
 ```
 
 #### Singleton Dependency
@@ -135,7 +135,7 @@ const dependencies = [
 For dependencies that should be singleton in the application, it's recommended to use `registerSingleton`.
 
 ```ts
-registerSingleton(/* a dependency item */);
+registerSingleton(/* a dependency item */)
 ```
 
 Dependencies would be provided by the root provider.
@@ -165,14 +165,14 @@ class ClassComponent extends Component {
 Assign `contextType` to be `InjectionContext` and you can get whatever you need using the `Inject` decorator.
 
 ```ts
-import { Inject, InjectionContext } from 'wedi';
+import { Inject, InjectionContext } from 'wedi'
 
-import { IPlatformService } from 'services/platform';
+import { IPlatformService } from 'services/platform'
 
 class ClassConsumer extends Component {
-  static contextType = InjectionContext;
+  static contextType = InjectionContext
 
-  @Inject(FileService) fileService!: FileService; // Accessible to all methods of this class.
+  @Inject(FileService) fileService!: FileService // Accessible to all methods of this class.
 }
 ```
 
@@ -197,9 +197,9 @@ You can pass `true` as the second parameter of `Inject` to indicate whether a de
 
 ```ts
 class ClassComponent extends Component {
-  static contextType = InjectionContext;
+  static contextType = InjectionContext
 
-  @Inject(CanBeNullService, true) canBeNullService?: CanBeNullService; // This can be null.
+  @Inject(CanBeNullService, true) canBeNullService?: CanBeNullService // This can be null.
 }
 ```
 
@@ -208,12 +208,16 @@ class ClassComponent extends Component {
 `useCollection` and `InjectionLayer` could make functional components providers and make sure that items wouldn't get re-instantiated when components re-render.
 
 ```tsx
-import { useCollection, Provider } from 'wedi';
+import { useCollection, Provider } from 'wedi'
 
 function FunctionProvider() {
-  const collection = useCollection([FileService]);
+  const collection = useCollection([FileService])
 
-  return <Provider>{/* Child components can use FileService. */}</Provider>;
+  return (
+    <Provider collection={collection}>
+      {/* Child components can use FileService. */}
+    </Provider>
+  )
 }
 ```
 
@@ -222,17 +226,17 @@ function FunctionProvider() {
 `useDependency` can help you to hook in dependencies. You can assign the second parameter `true` to make the dependency optional.
 
 ```tsx
-import { useDependency } from 'wedi';
-import { FileService } from 'services/file';
-import { LogService } from 'services/log';
+import { useDependency } from 'wedi'
+import { FileService } from 'services/file'
+import { LogService } from 'services/log'
 
 function FunctionConsumer() {
-  const fileService: FileService = useDependency(FileService);
-  const log: LogService | null = useDependency(LogService, true);
+  const fileService: FileService = useDependency(FileService)
+  const log: LogService | null = useDependency(LogService, true)
 
   return {
     /* Use dependencies. */
-  };
+  }
 }
 ```
 
@@ -249,27 +253,48 @@ wedi supports multi-level injection system. In other word, dependency items are 
 ])
 class ParentProvider extends Component {
   render() {
-    return <ChildProvider></ChildProvider>;
+    return <ChildProvider></ChildProvider>
   }
 }
 
 @Provide([[IConfig, { useValue: 'B' }]])
 class ChildProvider extends Component {
   render() {
-    return <Consumer></Consumer>;
+    return <Consumer></Consumer>
   }
 }
 
 function Consumer() {
-  const config = useDependency(IConfig);
-  const rootConfig = useDependency(IConfigRoot);
+  const config = useDependency(IConfig)
+  const rootConfig = useDependency(IConfigRoot)
 
   return (
     <div>
       {config}, {rootConfig}
     </div> // <div>B, inRoot</div>
-  );
+  )
 }
+```
+
+You could also use injectors outside of React component tree. So you can integrate React with other parts of system easily. With RxJS, you can use state to drive React from outside!
+
+```tsx
+const injectorFromAnOtherPartOfYourProgram = getInjector()
+
+function YourReactRoot(props: { injector: Injector }) {
+  return (
+    <Provider injector={props.injector}>
+      <App />
+    </Provider>
+  )
+}
+
+ReactDOM.render(
+  <YourReactRoot
+    injector={injectorFromAnotherPartOfYourProgram}
+  ></YourReactRoot>,
+  containerEl
+)
 ```
 
 ### Inject React Component
@@ -277,26 +302,26 @@ function Consumer() {
 You can use React Component as dependency, too.
 
 ```tsx
-const IDropdown = createIdentifier<any>('dropdown');
-const IConfig = createIdentifier<any>('config');
+const IDropdown = createIdentifier<any>('dropdown')
+const IConfig = createIdentifier<any>('config')
 
 const WebDropdown = function() {
-  const dep = useDependency(IConfig); // Could use dependencies in its host environment.
-  return <div>WeDropdown, {dep}</div>;
-};
+  const dep = useDependency(IConfig) // could use dependencies in its host environment
+  return <div>WeDropdown, {dep}</div>
+}
 
 @Provide([
   [IDropdown, { useValue: WebDropdown }],
   [IConfig, { useValue: 'wedi' }]
 ])
 class Header extends Component {
-  static contextType = InjectionContext;
+  static contextType = InjectionContext
 
-  @Inject(IDropdown) private dropdown: any;
+  @Inject(IDropdown) private dropdown: any
 
   render() {
-    const Dropdown = this.dropdown;
-    return <Dropdown></Dropdown>; // WeDropdown, wedi
+    const Dropdown = this.dropdown
+    return <Dropdown></Dropdown> // WeDropdown, wedi
   }
 }
 ```
@@ -306,28 +331,28 @@ class Header extends Component {
 It is easy to use RxJS with wedi to manage your app's state.
 
 ```tsx
-import { Provide, useDependency, useDependencyValue } from 'wedi';
+import { Provide, useDependency, useDependencyValue } from 'wedi'
 
 class CounterService {
-  count = 0;
+  count = 0
   counter$ = interval(1000).pipe(
     startWith(0),
     map(() => this.count++)
-  );
+  )
 }
 
 @Provide([CounterService])
 class App extends Component {
   render() {
-    return <Display />;
+    return <Display />
   }
 }
 
 function Display() {
-  const counter = useDependency(CounterService);
-  const count = useDependencyValue(counter.counter$);
+  const counter = useDependency(CounterService)
+  const count = useDependencyValue(counter.counter$)
 
-  return <div>{count}</div>; // 0, 1, 2, 3 ...
+  return <div>{count}</div> // 0, 1, 2, 3 ...
 }
 ```
 
@@ -342,7 +367,7 @@ You can use wedi without React.
 ```ts
 const collection = new DependencyCollection([
   // ...items
-]);
+])
 ```
 
 #### Injector
@@ -350,7 +375,7 @@ const collection = new DependencyCollection([
 `Injector` is the one who instantiates, provides and manages dependencies. And they will form a layered injection system.
 
 ```tsx
-const injector = new Injector(collection);
+const injector = new Injector(collection)
 ```
 
 - `createChild`, create a child injector of the current injector.
