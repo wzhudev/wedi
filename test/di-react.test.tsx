@@ -4,7 +4,7 @@ import React, { Component, FunctionComponent, useState } from 'react'
 import {
   createIdentifier,
   DependencyCollection,
-  IDisposable,
+  Disposable,
   Inject,
   InjectionContext,
   Injector,
@@ -259,7 +259,7 @@ describe('di-react', () => {
     it('should dispose when class component destroys', async () => {
       let disposed = false
 
-      class A implements IDisposable {
+      class A implements Disposable {
         log(): string {
           return 'a'
         }
@@ -303,7 +303,7 @@ describe('di-react', () => {
     it('should dispose when functional component destroys', async () => {
       let disposed = false
 
-      class A implements IDisposable {
+      class A implements Disposable {
         log(): string {
           return 'a'
         }
