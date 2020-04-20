@@ -66,7 +66,7 @@ export function useDependencyContext<T>(
   const depRef = useRef<Observable<T> | undefined>(undefined)
   const value = useDependencyValue(depValue$, defaultValue)
   const Context = useMemo(() => {
-    return createContext<T | undefined>(undefined)
+    return createContext<T | undefined>(value)
   }, [depValue$])
   const Provider = useCallback(
     (props: { initialState?: T; children: ReactNode }) => {
