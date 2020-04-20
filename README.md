@@ -371,8 +371,8 @@ function Parent() {
 }
 
 function Child() {
-  const anbObservable = useDependency(DependencyIdentifier).some$
-  const value = useDependencyContextValue(abObservable)
+  const anObservable = useDependency(DependencyIdentifier).some$
+  const value = useDependencyContextValue(anObservable)
 
   return <div>{value}</div>
 }
