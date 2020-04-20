@@ -27,6 +27,10 @@ export class InitPromise<T = any> {
   }
 }
 
+export function isInitPromise(thing: any): thing is InitPromise {
+  return thing instanceof InitPromise
+}
+
 export interface ClassItem<T> {
   useClass: Ctor<T>
   lazyInstantiation?: boolean
@@ -51,6 +55,20 @@ export interface FactoryItem<T> {
 
 export function isFactoryItem<T = any>(thing: any): thing is FactoryItem<T> {
   return !!(thing as any).useFactory
+}
+
+/**
+ * @experimental ImportItem
+ *
+ * support loading
+ */
+export interface ImportItem<T> {
+  useImport(): Promise<T>
+  deps?: DependencyKey<any>[]
+}
+
+export function isImportItem<T = any>(thing: any): thing is ImportItem<T> {
+  return !!(thing as any).useImport
 }
 
 export type DependencyValue<T> =

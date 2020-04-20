@@ -1,5 +1,15 @@
-import { useEffect, useState } from 'react';
-import { BehaviorSubject, Observable } from 'rxjs';
+import React, {
+  useEffect,
+  useState,
+  createContext,
+  useMemo,
+  useContext,
+  useCallback,
+  ReactNode,
+  Context,
+  useRef
+} from 'react'
+import { BehaviorSubject, Observable } from 'rxjs'
 
 /**
  * unwrap an observable value, return it to the component for rendering, and
@@ -12,34 +22,84 @@ import { BehaviorSubject, Observable } from 'rxjs';
  * dirty values and mark as dirty before updates.
  */
 export function useDependencyValue<T>(
-  depValue: Observable<T>,
+  depValue$: Observable<T>,
   defaultValue?: T
 ): T | undefined {
   const _defaultValue: T | undefined =
     defaultValue instanceof BehaviorSubject && defaultValue === undefined
       ? defaultValue.getValue()
-      : defaultValue;
-
-  const [value, setValue] = useState(_defaultValue);
+      : defaultValue
+  const [value, setValue] = useState(_defaultValue)
 
   useEffect(() => {
-    const subscription = depValue.subscribe((val: T) => setValue(val));
-    return () => subscription.unsubscribe();
-  }, []);
+    const subscription = depValue$.subscribe((val: T) => setValue(val))
+    return () => subscription.unsubscribe()
+  }, [depValue$])
 
-  return value;
+  return value
 }
 
 /**
- * subscribe to a singal that emits whenever data updates and re-render
+ * subscribe to a signal that emits whenever data updates and re-render
  *
  * @param update$ a signal that the data the functional component depends has updated
  */
 export function useUpdateBinder(update$: Observable<void>): void {
-  const [, dumpSet] = useState(0);
+  const [, dumpSet] = useState(0)
 
   useEffect(() => {
-    const subscription = update$.subscribe(() => dumpSet((prev) => prev + 1));
-    return () => subscription.unsubscribe();
-  }, []);
+    const subscription = update$.subscribe(() => dumpSet((prev) => prev + 1))
+    return () => subscription.unsubscribe()
+  }, [])
+}
+
+const DepValueMapProvider = new WeakMap<Observable<any>, Context<any>>()
+
+/**
+ * subscribe to an observable value from a service, creating a context for it so
+ * it child component won't have to subscribe again and cause unnecessary
+ */
+export function useDependencyContext<T>(
+  depValue$: Observable<T>,
+  defaultValue?: T
+) {
+  const depRef = useRef<Observable<T> | undefined>(undefined)
+  const value = useDependencyValue(depValue$, defaultValue)
+  const Context = useMemo(() => {
+    return createContext<T | undefined>(undefined)
+  }, [depValue$])
+  const Provider = useCallback(
+    (props: { initialState?: T; children: ReactNode }) => {
+      return <Context.Provider value={value}>{props.children}</Context.Provider>
+    },
+    [depValue$, value]
+  )
+
+  if (depRef.current !== depValue$) {
+    if (depRef.current) {
+      DepValueMapProvider.delete(depRef.current)
+    }
+
+    depRef.current = depValue$
+    DepValueMapProvider.set(depValue$, Context)
+  }
+
+  return {
+    Provider,
+    value
+  }
+}
+
+export function useDependencyContextValue<T>(
+  depValue$: Observable<T>
+): T | undefined {
+  const context = DepValueMapProvider.get(depValue$)
+
+  if (!context) {
+    throw new Error(
+      `[wedi] try to read context value but no ancestor component subscribed it ${depValue$}`
+    )
+  }
+
+  return useContext(context)
 }

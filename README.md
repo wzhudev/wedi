@@ -356,6 +356,28 @@ function Display() {
 }
 ```
 
+When you subscribe to the same observable values in a component and its child components (and child components of those), wedi would cause unnecessary re-rendering. To avoid that, you could use `useDependencyContext` and `useDependencyContextValue`.
+
+```tsx
+function Parent() {
+  const anObservable = useDependency(DependencyIdentifier).some$
+  const { Provider: ValueProvider, value } = useDependencyContext(anObservable)
+
+  return (
+    <ValueProvider>
+      <Child />
+    </ValueProvider>
+  )
+}
+
+function Child() {
+  const anbObservable = useDependency(DependencyIdentifier).some$
+  const value = useDependencyContextValue(abObservable)
+
+  return <div>{value}</div>
+}
+```
+
 ### Use the Core Directly
 
 You can use wedi without React.

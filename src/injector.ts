@@ -10,7 +10,9 @@ import {
   InitPromise,
   isClassItem,
   isFactoryItem,
-  isValueItem
+  isValueItem,
+  Identifier,
+  isInitPromise
 } from './typings'
 import {
   assertRecursionNotTrappedInACircle,
@@ -43,6 +45,12 @@ export class Injector implements Disposable {
 
   dispose(): void {
     this.collection.dispose()
+  }
+
+  add<T>(ctor: Ctor<T>): void
+  add<T>(key: Identifier<T>, item: DependencyValue<T>): void
+  add<T>(ctorOrKey: Ctor<T> | Identifier<T>, item?: DependencyValue<T>): void {
+    this.collection.add(ctorOrKey as any, item as any)
   }
 
   /**
@@ -79,12 +87,12 @@ export class Injector implements Disposable {
 
     if (typeof thing === 'undefined') {
       return null
-    } else if (thing instanceof InitPromise) {
+    } else if (isInitPromise(thing)) {
       return this.createAndCacheInstance(id, thing)
     } else if (isValueItem(thing)) {
       return thing.useValue
     } else if (isFactoryItem(thing)) {
-      return this.invokeDependencyFactory(id, thing)
+      return this.invokeDependencyFactory(id as Identifier<T>, thing)
     } else if (isClassItem(thing)) {
       return this.createAndCacheInstance(
         id,
@@ -214,13 +222,15 @@ export class Injector implements Disposable {
   }
 
   private invokeDependencyFactory<T>(
-    id: DependencyKey<T>,
+    id: Identifier<T>,
     factory: FactoryItem<T>
   ): T {
     const dependencies = factory.deps?.map((dp) => this.getOrInit(dp)) || []
     const thing = factory.useFactory.call(null, dependencies)
 
-    this.collection.add(id, thing)
+    this.collection.add(id, {
+      useValue: thing
+    })
 
     return thing
   }

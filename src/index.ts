@@ -24,4 +24,9 @@ export {
   InjectionProviderProps
 } from './react/context'
 export { useCollection, useDependency } from './react/hooks'
-export { useDependencyValue, useUpdateBinder } from './react/rx'
+export {
+  useDependencyValue,
+  useUpdateBinder,
+  useDependencyContext,
+  useDependencyContextValue
+} from './react/rx'
