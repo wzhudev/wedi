@@ -1,10 +1,10 @@
-import React, { Component, ComponentClass, createElement } from 'react';
+import React, { Component, ComponentClass, createElement } from 'react'
 
-import { DependencyCollection } from '../collection';
-import { Injector } from '../injector';
-import { Ctor, DependencyItem, Identifier } from '../typings';
-import { getDependencyKeyName } from '../utils';
-import { Provider } from './context';
+import { DependencyCollection } from '../collection'
+import { Injector } from '../injector'
+import { Ctor, DependencyItem, Identifier } from '../typings'
+import { getDependencyKeyName } from '../utils'
+import { Provider } from './context'
 
 /**
  * an decorator that could be used on a React class component
@@ -13,19 +13,19 @@ import { Provider } from './context';
 export function Provide(items: DependencyItem<any>[]) {
   return function(target: any): any {
     function getChild(this: Component) {
-      return createElement(target, this.props);
+      return createElement(target, this.props)
     }
 
     class ProviderWrapper extends Component<any, any> {
-      $$collection: DependencyCollection;
+      $$collection: DependencyCollection
 
       constructor(props: any, context: any) {
-        super(props, context);
-        this.$$collection = new DependencyCollection(items);
+        super(props, context)
+        this.$$collection = new DependencyCollection(items)
       }
 
       componentWillUnmount(): void {
-        this.$$collection.dispose();
+        this.$$collection.dispose()
       }
 
       render() {
@@ -33,14 +33,14 @@ export function Provide(items: DependencyItem<any>[]) {
           <Provider collection={this.$$collection}>
             {getChild.call(this)}
           </Provider>
-        );
+        )
       }
     }
 
-    (ProviderWrapper as ComponentClass).displayName = `ProviderWrapper.${target.name}`;
+    ;(ProviderWrapper as ComponentClass).displayName = `ProviderWrapper.${target.name}`
 
-    return ProviderWrapper;
-  };
+    return ProviderWrapper
+  }
 }
 
 /**
@@ -57,32 +57,32 @@ export function Inject<T>(
       // the current context
       get(): T | null {
         // tslint:disable-next-line:no-invalid-this
-        const thisAsComponent: Component<any> = this as any;
+        const thisAsComponent: Component<any> = this as any
 
-        ensureInjectionContextExists(thisAsComponent);
+        ensureInjectionContextExists(thisAsComponent)
 
-        const injector: Injector = thisAsComponent.context.injector;
-        const thing = injector && injector.getOrInit(id);
+        const injector: Injector = thisAsComponent.context.injector
+        const thing = injector && injector.getOrInit(id)
 
         if (!optional && !thing) {
           throw Error(
             `[wedi] Cannot get an instance of "${getDependencyKeyName(id)}".`
-          );
+          )
         }
 
-        return thing || null;
+        return thing || null
       },
       set(_value: never) {
         throw Error(
           `[wedi] You can never set value to a dependency. Check "${propName}" of "${getDependencyKeyName(
             id
           )}".`
-        );
+        )
       }
-    };
+    }
 
-    return descriptor;
-  };
+    return descriptor
+  }
 }
 
 function ensureInjectionContextExists(component: Component<any>): void {
@@ -91,6 +91,6 @@ function ensureInjectionContextExists(component: Component<any>): void {
       `[wedi] You should make "InjectorContext" as ${component.constructor.name}'s default context type. ` +
         'If you want to use multiple context, please check this page on React documentation. ' +
         'https://reactjs.org/docs/context.html#classcontexttype'
-    );
+    )
   }
 }

@@ -19,7 +19,9 @@ declare function requestIdleCallback(
   callback: (args: IdleDeadline) => void,
   options?: { timeout: number }
 ): number
-declare function cancelIdleCallback(handle: number): void
+declare function cancelIdleCallback(
+  handle: number
+): void
 
 // use an IIFE to set up runWhenIdle
 ;(function() {
@@ -71,11 +73,11 @@ declare function cancelIdleCallback(handle: number): void
  */
 export class IdleValue<T> {
   private readonly executor: () => void
-  private value?: T
+  private readonly disposeCallback: () => void
 
   private didRun: boolean = false
+  private value?: T
   private error?: Error
-  private readonly disposeCallback: () => void
 
   constructor(executor: () => T) {
     this.executor = () => {
