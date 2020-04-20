@@ -57,20 +57,6 @@ export function isFactoryItem<T = any>(thing: any): thing is FactoryItem<T> {
   return !!(thing as any).useFactory
 }
 
-/**
- * @experimental ImportItem
- *
- * support loading
- */
-export interface ImportItem<T> {
-  useImport(): Promise<T>
-  deps?: DependencyKey<any>[]
-}
-
-export function isImportItem<T = any>(thing: any): thing is ImportItem<T> {
-  return !!(thing as any).useImport
-}
-
 export type DependencyValue<T> =
   | Ctor<T>
   | InitPromise<T>
