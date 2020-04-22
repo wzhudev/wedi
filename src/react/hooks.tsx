@@ -31,7 +31,7 @@ export function useDependency<T>(
   optional?: boolean
 ): T | null {
   const { injector } = useContext(InjectionContext)
-  const thing = injector && injector.getOrInit(key)
+  const thing = injector?.getOrInit(key)
 
   if (!optional && !thing) {
     throw Error(
@@ -40,4 +40,57 @@ export function useDependency<T>(
   }
 
   return thing || null
+}
+
+type Nullable<T> = T | null
+
+export function useMultiDependencies<D1, D2>(
+  keys: [DependencyKey<D1>, DependencyKey<D2>]
+): [Nullable<D1>, Nullable<D2>]
+export function useMultiDependencies<D1, D2, D3>(
+  keys: [DependencyKey<D1>, DependencyKey<D2>, DependencyKey<D3>]
+): [Nullable<D1>, Nullable<D2>, Nullable<D3>]
+export function useMultiDependencies<D1, D2, D3, D4>(
+  keys: [
+    DependencyKey<D1>,
+    DependencyKey<D2>,
+    DependencyKey<D3>,
+    DependencyKey<D4>
+  ]
+): [Nullable<D1>, Nullable<D2>, Nullable<D3>, Nullable<D4>]
+export function useMultiDependencies<D1, D2, D3, D4, D5>(
+  keys: [
+    DependencyKey<D1>,
+    DependencyKey<D2>,
+    DependencyKey<D3>,
+    DependencyKey<D4>,
+    DependencyKey<D5>
+  ]
+): [Nullable<D1>, Nullable<D2>, Nullable<D3>, Nullable<D4>, Nullable<D5>]
+export function useMultiDependencies<D1, D2, D3, D4, D5, D6>(
+  keys: [
+    DependencyKey<D1>,
+    DependencyKey<D2>,
+    DependencyKey<D3>,
+    DependencyKey<D4>,
+    DependencyKey<D5>,
+    DependencyKey<D6>
+  ]
+): [
+  Nullable<D1>,
+  Nullable<D2>,
+  Nullable<D3>,
+  Nullable<D4>,
+  Nullable<D5>,
+  Nullable<D6>
+]
+export function useMultiDependencies(keys: any[]): any[] {
+  const ret = new Array(keys.length).fill(null)
+  const { injector } = useContext(InjectionContext)
+
+  keys.forEach((key, index) => {
+    ret[index] = injector?.getOrInit(key) ?? null
+  })
+
+  return ret
 }

@@ -13,6 +13,7 @@ import {
   useCollection,
   useDependency
 } from '../src'
+import { useMultiDependencies } from '../src/react/hooks'
 
 class Log {
   log(): string {
@@ -111,6 +112,41 @@ describe('di-react', () => {
   })
 
   describe('functional component', () => {
+    it('should useMultilpleDependencies work', () => {
+      class Log {
+        log(): string {
+          return 'wedi'
+        }
+      }
+
+      class Counter {
+        count = 0
+      }
+
+      function App() {
+        const collection = useCollection([Log, Counter])
+
+        return (
+          <Provider collection={collection}>
+            <Child></Child>
+          </Provider>
+        )
+      }
+
+      function Child() {
+        const [log, counter] = useMultiDependencies([Log, Counter])
+
+        return (
+          <div>
+            {log?.log()}, {counter?.count}
+          </div>
+        )
+      }
+
+      const { container } = render(<App />)
+      expect(container.firstElementChild!.textContent).toBe('wedi, 0')
+    })
+
     it('should not recreate collection when function component container re-renders', async () => {
       let count = 0
 
