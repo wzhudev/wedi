@@ -11,7 +11,8 @@ import {
   Provide,
   Provider,
   useCollection,
-  useDependency
+  useDependency,
+  useMultiDependencies
 } from '../src'
 
 class Log {
@@ -71,7 +72,7 @@ describe('di-react', () => {
         }
       }
 
-      expect(() => render(<App></App>)).toThrow(
+      expect(() => render(<App />)).toThrow(
         `[wedi] You should make "InjectorContext" as App's default context type. If you want to use multiple context, please check this page on React documentation. https://reactjs.org/docs/context.html#classcontexttype`
       )
     })
@@ -88,7 +89,7 @@ describe('di-react', () => {
         }
       }
 
-      expect(() => render(<App></App>)).toThrow(
+      expect(() => render(<App />)).toThrow(
         '[wedi] Cannot get an instance of "Log".'
       )
     })
@@ -111,6 +112,41 @@ describe('di-react', () => {
   })
 
   describe('functional component', () => {
+    it('should useMultilpleDependencies work', () => {
+      class Log {
+        log(): string {
+          return 'wedi'
+        }
+      }
+
+      class Counter {
+        count = 0
+      }
+
+      function App() {
+        const collection = useCollection([Log, Counter])
+
+        return (
+          <Provider collection={collection}>
+            <Child />
+          </Provider>
+        )
+      }
+
+      function Child() {
+        const [log, counter] = useMultiDependencies([Log, Counter])
+
+        return (
+          <div>
+            {log?.log()}, {counter?.count}
+          </div>
+        )
+      }
+
+      const { container } = render(<App />)
+      expect(container.firstElementChild!.textContent).toBe('wedi, 0')
+    })
+
     it('should not recreate collection when function component container re-renders', async () => {
       let count = 0
 
@@ -130,7 +166,7 @@ describe('di-react', () => {
         return (
           <div onClick={() => setVisible(!visible)}>
             <Provider collection={collection}>
-              {visible ? <Children></Children> : <div>Nothing</div>}
+              {visible ? <Children /> : <div>Nothing</div>}
             </Provider>
           </div>
         )
@@ -163,7 +199,7 @@ describe('di-react', () => {
 
         return (
           <Provider collection={collection}>
-            <App></App>
+            <App />
           </Provider>
         )
       }
@@ -174,7 +210,7 @@ describe('di-react', () => {
         return <div>{log.log()}</div>
       }
 
-      expect(() => render(<AppContainer></AppContainer>)).toThrow(
+      expect(() => render(<AppContainer />)).toThrow(
         `[wedi] Cannot get an instance of "Log".`
       )
     })
@@ -185,7 +221,7 @@ describe('di-react', () => {
 
         return (
           <Provider collection={collection}>
-            <App></App>
+            <App />
           </Provider>
         )
       }
@@ -196,7 +232,7 @@ describe('di-react', () => {
         return <div>{log?.log() || 'wedi'}</div>
       }
 
-      const { container } = render(<AppContainer></AppContainer>)
+      const { container } = render(<AppContainer />)
       expect(container.firstElementChild!.textContent).toBe('wedi')
     })
   })
@@ -229,14 +265,14 @@ describe('di-react', () => {
     ])
     class Parent extends Component {
       render() {
-        return <Child></Child>
+        return <Child />
       }
     }
 
     @Provide([[id, { useClass: B }]])
     class Child extends Component {
       render() {
-        return <GrandChild></GrandChild>
+        return <GrandChild />
       }
     }
 
@@ -273,7 +309,7 @@ describe('di-react', () => {
         const [show, setShow] = useState(true)
         return (
           <div onClick={() => setShow(!show)}>
-            {show ? <Child></Child> : <div>null</div>}
+            {show ? <Child /> : <div>null</div>}
           </div>
         )
       }
@@ -289,7 +325,7 @@ describe('di-react', () => {
         }
       }
 
-      const { container } = render(<Parent></Parent>)
+      const { container } = render(<Parent />)
       expect(container.firstElementChild!.textContent).toBe('a')
 
       await act(() => {
@@ -317,7 +353,7 @@ describe('di-react', () => {
         const [show, setShow] = useState(true)
         return (
           <div onClick={() => setShow(!show)}>
-            {show ? <Child></Child> : <div>null</div>}
+            {show ? <Child /> : <div>null</div>}
           </div>
         )
       }
@@ -327,7 +363,7 @@ describe('di-react', () => {
 
         return (
           <Provider collection={collection}>
-            <GrandChild></GrandChild>
+            <GrandChild />
           </Provider>
         )
       }
@@ -338,7 +374,7 @@ describe('di-react', () => {
         return <div>{a.log()}</div>
       }
 
-      const { container } = render(<Parent></Parent>)
+      const { container } = render(<Parent />)
       expect(container.firstElementChild!.textContent).toBe('a')
 
       await act(() => {
@@ -370,7 +406,7 @@ describe('di-react', () => {
 
       render() {
         const Dropdown = this.dropdown
-        return <Dropdown></Dropdown>
+        return <Dropdown />
       }
     }
 
@@ -384,7 +420,7 @@ describe('di-react', () => {
     function App() {
       return (
         <Provider injector={injector}>
-          <Children></Children>
+          <Children />
         </Provider>
       )
     }

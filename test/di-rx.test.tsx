@@ -51,7 +51,7 @@ describe('di-rx', () => {
     class CounterService implements Disposable {
       public counter$: BehaviorSubject<number>
       private number: number
-      private loop?: number
+      private readonly loop?: number
 
       constructor() {
         this.number = 5
@@ -166,7 +166,7 @@ describe('di-rx', () => {
 
       return (
         <CounterProvider>
-          <Child></Child>
+          <Child />
         </CounterProvider>
       )
     }
