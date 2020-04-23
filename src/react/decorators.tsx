@@ -52,7 +52,7 @@ export function Inject<T>(
   optional: boolean = false
 ) {
   return function(target: any, propName: string, _originDescriptor?: any): any {
-    const descriptor = {
+    return {
       // when user is trying to get the service, get it from the injector in
       // the current context
       get(): T | null {
@@ -80,8 +80,6 @@ export function Inject<T>(
         )
       }
     }
-
-    return descriptor
   }
 }
 

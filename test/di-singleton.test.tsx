@@ -94,7 +94,7 @@ describe('di-core-singleton', () => {
         <Provider collection={collection}>
           <div onClick={() => setCount(count + 1)}>
             {count}
-            <Child></Child>
+            <Child />
           </div>
         </Provider>
       )
@@ -106,7 +106,7 @@ describe('di-core-singleton', () => {
       return <>, {c.getCounter()}</>
     }
 
-    const { container } = render(<App></App>)
+    const { container } = render(<App />)
 
     expect(container.firstChild!.textContent).toBe('0, 1')
 

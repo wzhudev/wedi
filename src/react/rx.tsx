@@ -26,8 +26,9 @@ export function useDependencyValue<T>(
   defaultValue?: T
 ): T | undefined {
   const _defaultValue: T | undefined =
-    defaultValue instanceof BehaviorSubject && defaultValue === undefined
-      ? defaultValue.getValue()
+    depValue$ instanceof BehaviorSubject &&
+    typeof defaultValue === 'undefined'
+      ? depValue$.getValue()
       : defaultValue
   const [value, setValue] = useState(_defaultValue)
 
