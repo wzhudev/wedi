@@ -16,3 +16,6 @@ yarn.lock
 # build
 dist
 esm
+
+# yarn
+yarn-error.log

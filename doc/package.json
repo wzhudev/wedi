@@ -1,0 +1,15 @@
+{
+  "name": "wedi-doc",
+  "scripts": {
+    "docz:dev": "docz dev",
+    "docz:build": "docz build",
+    "docz:serve": "docz build && docz serve"
+  },
+  "devDependencies": {
+    "docz": "^2.3.1"
+  },
+  "dependencies": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  }
+}
