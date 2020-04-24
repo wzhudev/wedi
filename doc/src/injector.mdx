@@ -1,0 +1,32 @@
+---
+name: Dependency Injection
+route: /di
+---
+
+In case you are not familiar with dependency injection pattern, here are three major concepts in a dependency injection system you should know:
+
+- **Dependency Item**: Anything that could be used by other classes or React components. Usually they are identified by `key`s. A dependency could be a class, a value or a function, etc.
+- **Provider** (a.k.a injector). The manager of dependency items. It _provides_ dependency items and instantiate or evaluate dependency items at consumers' need.
+- **Consumer**: They consume dependency items. They use `key`s to get dependency items. A consumers can be a dependency item at the same time.
+
+## DependencyCollection
+
+`DependencyCollection` is used to collect dependencies. Later it would be passed into an injector.
+
+```ts
+const collection = new DependencyCollection([
+  // ...items
+])
+```
+
+## Injector
+
+`Injector` is the one who instantiates, provides and manages dependencies. And they will form a layered injection system.
+
+```tsx
+const injector = new Injector(collection)
+```
+
+## Multi-Layered Injector System
+
+wedi supports multi-layered injector system. In another word, every injector could have child injectors. A child injector could ask its parent injector for a dependency when it could not provide a by itself.

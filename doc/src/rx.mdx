@@ -27,6 +27,7 @@ class NotificationService implements Disposable {
     this.destroy = new Subject<void>();
     this.notificationS = this.lifecycleS.bootstrap$
       .pipe(
+        take(1),
         concatMap(() => interval(10000)),
         concatMap(() => httpS.request(/* some url */)),
         startWith([]),

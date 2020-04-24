@@ -1,0 +1,193 @@
+---
+name: React
+route: /react
+---
+
+wedi provides API let you use dependency injection in React conveniently.
+
+## Class Component as Provider
+
+The `Provide` decorator could inject items into the decorated component and its child components.
+
+```ts
+import { Provide } from 'wedi';
+import { FileService } from 'services/file';
+import { IPlatformService } from 'services/platform';
+
+@Provide([
+  FileService,
+  [IPlatformService, { useClass: MobilePlatformService } ];
+])
+class ClassComponent extends Component {
+  // FileService and IPlatformService is accessible in the component and its children
+}
+```
+
+## Class Component as Consumer
+
+If you would like consume dependencies in a class component, you should assign `contextType` to be `InjectionContext` and get dependencies using the `Inject` decorator.
+
+```ts
+import { Inject, InjectionContext } from 'wedi'
+import { IPlatformService } from 'services/platform'
+
+class ClassConsumer extends Component {
+  static contextType = InjectionContext
+
+  @Inject(FileService) fileService!: FileService // accessible to all methods of this class
+}
+```
+
+A class component can consume items provided by itself.
+
+```ts
+import { Inject, InjectionContext, Provide } from 'wedi';
+import { IPlatformService } from 'services/platform';
+
+@Provide([
+  FileService,
+  [IPlatformService, { useClass: MobilePlatformService }];
+])
+class ClassComponent extends Component {
+  static contextType = InjectionContext;
+
+  @Inject(IPlatformService) platformService!: IPlatformService; // this is MobilePlatformService
+}
+```
+
+You can pass `true` as the second parameter of `Inject` to indicate that a dependency is optional.
+
+```ts
+class ClassComponent extends Component {
+  static contextType = InjectionContext
+
+  @Inject(CanBeNullService, true) canBeNullService?: CanBeNullService // this can be null
+}
+```
+
+## Functional Component as Provider
+
+`useCollection` and `InjectionLayer` could make functional components as providers and make sure that dependencies wouldn't get re-instantiated when components re-render.
+
+```tsx
+import { useCollection, Provider } from 'wedi'
+
+function FunctionProvider() {
+  const collection = useCollection([FileService])
+
+  return (
+    <Provider collection={collection}>
+      {/* Child components can use FileService. */}
+    </Provider>
+  )
+}
+```
+
+You could also use injectors directly. But this is only recommended when the injector is outside of the React component tree.
+
+```tsx
+const injectorFromAnOtherPartOfYourProgram = getInjector()
+
+function YourReactRoot(props: { injector: Injector }) {
+  return (
+    <Provider injector={props.injector}>
+      <App />
+    </Provider>
+  )
+}
+
+ReactDOM.render(
+  <YourReactRoot
+    injector={injectorFromAnotherPartOfYourProgram}
+  ></YourReactRoot>,
+  containerEl
+)
+```
+
+In this way, you could easily integrate React with other part of you application easily.
+
+You can see that when a component tries to get a dependency, it would always ask the **nearest** provider for it, which means you could use scoped state management with wedi.
+
+## Functional Component as Consumer
+
+`useDependency` can help you to hook in dependencies. You can assign the second parameter `true` to mark the injected dependency as optional.
+
+```tsx
+import { useDependency } from 'wedi'
+import { FileService } from 'services/file'
+import { LogService } from 'services/log'
+
+function FunctionConsumer() {
+  const fileService: FileService = useDependency(FileService)
+  const log: LogService | null = useDependency(LogService, true)
+
+  return {
+    /* use dependencies */
+  }
+}
+```
+
+Note that functional cannot consume items provided by itself.
+
+## Multi-Layered Injector System
+
+injectors of wedi could have child components and React components could have child components. Combined, you could use multi-layered injector system in React seamlessly.
+
+```tsx
+@Provide([
+  [IConfig, { useValue: 'A' }],
+  [IConfigRoot, { useValue: 'inRoot' }]
+])
+class ParentProvider extends Component {
+  render() {
+    return <ChildProvider></ChildProvider>
+  }
+}
+
+@Provide([[IConfig, { useValue: 'B' }]])
+class ChildProvider extends Component {
+  render() {
+    return <Consumer></Consumer>
+  }
+}
+
+function Consumer() {
+  const config = useDependency(IConfig)
+  const rootConfig = useDependency(IConfigRoot)
+
+  return (
+    <div>
+      {config}, {rootConfig}
+    </div> // <div>B, inRoot</div>
+  )
+}
+```
+
+## Inject React Component
+
+You could inject React Component as a dependency, too.
+
+```tsx
+const IDropdown = createIdentifier<any>('dropdown')
+const IConfig = createIdentifier<any>('config')
+
+const WebDropdown = function() {
+  const dep = useDependency(IConfig) // could use dependencies in its host environment
+  return <div>WeDropdown, {dep}</div>
+}
+
+@Provide([
+  [IDropdown, { useValue: WebDropdown }],
+  [IConfig, { useValue: 'wedi' }]
+])
+class Header extends Component {
+  static contextType = InjectionContext
+
+  @Inject(IDropdown) private dropdown: any
+
+  render() {
+    const Dropdown = this.dropdown
+    return <Dropdown></Dropdown> // WeDropdown, wedi
+  }
+}
+```

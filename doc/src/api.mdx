@@ -1,0 +1,36 @@
+---
+name: API
+route: /api
+---
+
+<!-- I need a API generator... -->
+
+## Core
+
+### Injector
+
+Instantiate, manage and destroy dependencies.
+
+```ts
+export declare class Injector implements Disposable {
+  constructor(collection: DependencyCollection, parent?: Injector)
+  add<T>(ctor: Ctor<T>): void
+  add<T>(key: Identifier<T>, item: DependencyValue<T>): void
+  createChild(dependencies?: DependencyCollection): Injector
+  get<T>(id: DependencyKey<T>): T | null
+  getOrInit<T>(id: DependencyKey<T>): T | null
+  createInstance<T>(ctor: Ctor<T> | InitPromise<T>, ...extraParams: any[]): T
+}
+```
+
+#### Constructor
+
+Create an injector. Could use the `parent` parameter to build layered injector system.
+
+#### Methods
+
+- add
+
+## DependencyCollection
+
+## Provide
