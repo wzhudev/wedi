@@ -4,6 +4,7 @@ route: /api
 ---
 
 <!-- I need a API generator... -->
+
 # API
 
 ## Core
@@ -42,11 +43,11 @@ Hold dependencies and manage lifecycle of them.
 
 ```ts
 export declare class DependencyCollection implements Disposable {
-    constructor(deps?: DependencyItem<any>[]);
-    add<T>(ctor: Ctor<T>): void;
-    add<T>(key: DependencyKey<T>, item: DependencyValue<T> | T): void;
-    has(key: DependencyKey<any>): boolean;
-    get<T>(key: DependencyKey<T>): T | DependencyValue<T> | undefined;
+  constructor(deps?: DependencyItem<any>[])
+  add<T>(ctor: Ctor<T>): void
+  add<T>(key: DependencyKey<T>, item: DependencyValue<T> | T): void
+  has(key: DependencyKey<any>): boolean
+  get<T>(key: DependencyKey<T>): T | DependencyValue<T> | undefined
 }
 ```
 
@@ -55,16 +56,23 @@ export declare class DependencyCollection implements Disposable {
 Here's valid types of a dependency item.
 
 ```tsx
-export declare type DependencyValue<T> = Ctor<T> | ValueItem<T> | ClassItem<T> | FactoryItem<T>;
+export declare type DependencyValue<T> =
+  | Ctor<T>
+  | ValueItem<T>
+  | ClassItem<T>
+  | FactoryItem<T>
 
-export declare type DependencyKey<T> = Identifier<T> | Ctor<T>;
+export declare type DependencyKey<T> = Identifier<T> | Ctor<T>
 
-export declare type DependencyItem<T> = [Identifier<T>, DependencyValue<T>] | Ctor<T>;
+export declare type DependencyItem<T> =
+  | [Identifier<T>, DependencyValue<T>]
+  | Ctor<T>
 ```
+
 ### `createIdentifier`
 
 ```tsx
-export declare function createIdentifier<T>(name: string): Identifier<T>;
+export declare function createIdentifier<T>(name: string): Identifier<T>
 ```
 
 Create an identifier. This identifier could also be used as a decorator to parameters of a class.
@@ -72,7 +80,9 @@ Create an identifier. This identifier could also be used as a decorator to param
 ### [decorator] Optional
 
 ```tsx
-export declare function Optional<T>(key: DependencyKey<T>): (target: Ctor<T>, _key: string, index: number) => void;
+export declare function Optional<T>(
+  key: DependencyKey<T>
+): (target: Ctor<T>, _key: string, index: number) => void
 ```
 
 This decorator could be applied to parameters of a class to mark its dependencies as **optional**.
@@ -80,7 +90,9 @@ This decorator could be applied to parameters of a class to mark its dependencie
 ### [decorator] Need
 
 ```tsx
-export declare function Need<T>(key: DependencyKey<T>): <C>(target: Ctor<C>, _key: string, index: number) => void;
+export declare function Need<T>(
+  key: DependencyKey<T>
+): <C>(target: Ctor<C>, _key: string, index: number) => void
 ```
 
 This decorator could be applied to parameters of a class to mark its dependencies as **required**.
@@ -88,7 +100,11 @@ This decorator could be applied to parameters of a class to mark its dependencie
 ### registerSingleton
 
 ```tsx
-export declare function registerSingleton<T>(id: Identifier<T>, ctor: Ctor<T>, lazyInstantiation?: boolean): void;
+export declare function registerSingleton<T>(
+  id: Identifier<T>,
+  ctor: Ctor<T>,
+  lazyInstantiation?: boolean
+): void
 ```
 
 Register a class dependency item as singleton with a identifier.
@@ -115,7 +131,9 @@ export interface InjectionProviderProps {
 An decorator that could be used on a React class component to provide a injection context on that component.
 
 ```tsx
-export declare function Provide(items: DependencyItem<any>[]): (target: any) => any;
+export declare function Provide(
+  items: DependencyItem<any>[]
+): (target: any) => any
 ```
 
 ### `Inject`
@@ -123,7 +141,10 @@ export declare function Provide(items: DependencyItem<any>[]): (target: any) => 
 Returns decorator that could be used on a property of a React class component to inject a dependency
 
 ```tsx
-export declare function Inject<T>(id: Identifier<T> | Ctor<T>, optional?: boolean): (target: any, propName: string, _originDescriptor?: any) => any;
+export declare function Inject<T>(
+  id: Identifier<T> | Ctor<T>,
+  optional?: boolean
+): (target: any, propName: string, _originDescriptor?: any) => any
 ```
 
 ### `useCollection`
@@ -133,14 +154,20 @@ When providing dependencies in a functional component, it would be expensive (no
 This API is actually a memo to return the same `DependencyCollection` in a component.
 
 ```tsx
-export declare function useCollection(entries?: DependencyItem<any>[]): DependencyCollection;
+export declare function useCollection(
+  entries?: DependencyItem<any>[]
+): DependencyCollection
 ```
 
 ### `useDependency`
 
 ```tsx
-export declare function useDependency<T>(key: DependencyKey<T>, optional?: boolean): T | null;
+export declare function useDependency<T>(
+  key: DependencyKey<T>,
+  optional?: boolean
+): T | null
 ```
+
 ## RxJS
 
 ### `useDependencyValue`
@@ -152,7 +179,10 @@ Unwrap an observable value, return it to the component for rendering, and trigge
 If you have to do that, consider using `useDependencyContext` and `useDependencyContextValue` instead.
 
 ```tsx
-export declare function useDependencyValue<T>(depValue$: Observable<T>, defaultValue?: T): T | undefined;
+export declare function useDependencyValue<T>(
+  depValue$: Observable<T>,
+  defaultValue?: T
+): T | undefined
 ```
 
 ### `useDependencyContext` & `useDependencyContextValue`
@@ -160,13 +190,18 @@ export declare function useDependencyValue<T>(depValue$: Observable<T>, defaultV
 Subscribe to an observable value from a service, creating a context for it so its child component won't have to subscribe again and cause unnecessary.
 
 ```tsx
-export declare function useDependencyContext<T>(depValue$: Observable<T>, defaultValue?: T): {
-    Provider: (props: {
-        initialState?: T | undefined;
-        children: React.ReactNode;
-    }) => JSX.Element;
-    value: T | undefined;
-};
+export declare function useDependencyContext<T>(
+  depValue$: Observable<T>,
+  defaultValue?: T
+): {
+  Provider: (props: {
+    initialState?: T | undefined
+    children: React.ReactNode
+  }) => JSX.Element
+  value: T | undefined
+}
 
-export declare function useDependencyContextValue<T>(depValue$: Observable<T>): T | undefined;
+export declare function useDependencyContextValue<T>(
+  depValue$: Observable<T>
+): T | undefined
 ```

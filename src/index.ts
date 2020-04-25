@@ -23,7 +23,11 @@ export {
   Provider,
   InjectionProviderProps
 } from './react/context'
-export { useCollection, useDependency, useMultiDependencies } from './react/hooks'
+export {
+  useCollection,
+  useDependency,
+  useMultiDependencies
+} from './react/hooks'
 export {
   useDependencyValue,
   useUpdateBinder,

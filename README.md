@@ -88,14 +88,12 @@ wedi provide some Hooks that helps you use wedi with RxJS smoothly.
 
 ```tsx
 function ReRenderOnNewValue() {
-  const notificationS = useDependency(NotificationService);
+  const notificationS = useDependency(NotificationService)
   const val = useDependencyValue(notificationS.data$)
 
   // re-return when data$ emits a new value
 }
 ```
-
-For more, please read With [RxJS](/rx) for more details.
 
 ## Demo
 
@@ -104,7 +102,7 @@ Here is a TodoMVC [demo](https://wendellhu95.github.io/wedi-demo) built with wed
 ## Links
 
 - [GitHub Repo](https://github.com/wendellhu95/wedi)
-- [Doc](https://wedi.wendellhu95.xyz)
+- [Doc](https://wedi.wendellhu.xyz)
 
 ## License
 

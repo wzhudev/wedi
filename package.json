@@ -1,6 +1,6 @@
 {
   "name": "wedi",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "author": "Wendell Hu <wendellhu95@gmail.com>",
   "description": "A lightweight dependency injection (DI) library for TypeScript, along with a binding for React.",
   "main": "./dist/index.js",
@@ -17,7 +17,7 @@
     "build:cjs": "ncc build src/index.ts -o dist -m -e react",
     "build:esm": "tsc --module ES6 --outDir esm",
     "test": "jest --coverage",
-    "prettier": "prettier --write \"./{src,test}/**/*.{ts,tsx,css}\""
+    "prettier": "prettier --write \"./{src,test}/**/*.{ts,tsx,css}\" && prettier --write \"./doc/src/**/*.{ts,tsx,mdx}\""
   },
   "devDependencies": {
     "@testing-library/react": "^9.4.0",
