@@ -3,6 +3,8 @@ name: Dependency Injection
 route: /di
 ---
 
+# Dependency Injection
+
 In case you are not familiar with dependency injection pattern, here are three major concepts in a dependency injection system you should know:
 
 - **Dependency Item**: Anything that could be used by other classes or React components. Usually they are identified by `key`s. A dependency could be a class, a value or a function, etc.
@@ -30,3 +32,5 @@ const injector = new Injector(collection)
 ## Multi-Layered Injector System
 
 wedi supports multi-layered injector system. In another word, every injector could have child injectors. A child injector could ask its parent injector for a dependency when it could not provide a by itself.
+
+## Why Dependency Injection?

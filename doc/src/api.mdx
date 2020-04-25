@@ -4,12 +4,13 @@ route: /api
 ---
 
 <!-- I need a API generator... -->
+# API
 
 ## Core
 
 ### Injector
 
-Instantiate, manage and destroy dependencies.
+Instantiate, manage, provide and destroy dependencies.
 
 ```ts
 export declare class Injector implements Disposable {
@@ -29,8 +30,143 @@ Create an injector. Could use the `parent` parameter to build layered injector s
 
 #### Methods
 
-- add
+- `add`, to add a new dependency.
+- `createChild`, to create a child injector with a bunch of dependencies.
+- `get`, get a dependency. Return null if there's no existing dependency matching the given `DependencyKey`.
+- `getOrInit`, get a dependency, try to instantiate one if there's no existing dependency matching the given `DependencyKey`
+- `createInstance`, instantiate a class. If the class requires dependencies, the injector would provide them.
 
-## DependencyCollection
+### DependencyCollection
 
-## Provide
+Hold dependencies and manage lifecycle of them.
+
+```ts
+export declare class DependencyCollection implements Disposable {
+    constructor(deps?: DependencyItem<any>[]);
+    add<T>(ctor: Ctor<T>): void;
+    add<T>(key: DependencyKey<T>, item: DependencyValue<T> | T): void;
+    has(key: DependencyKey<any>): boolean;
+    get<T>(key: DependencyKey<T>): T | DependencyValue<T> | undefined;
+}
+```
+
+### [type] `DependencyItem`
+
+Here's valid types of a dependency item.
+
+```tsx
+export declare type DependencyValue<T> = Ctor<T> | ValueItem<T> | ClassItem<T> | FactoryItem<T>;
+
+export declare type DependencyKey<T> = Identifier<T> | Ctor<T>;
+
+export declare type DependencyItem<T> = [Identifier<T>, DependencyValue<T>] | Ctor<T>;
+```
+### `createIdentifier`
+
+```tsx
+export declare function createIdentifier<T>(name: string): Identifier<T>;
+```
+
+Create an identifier. This identifier could also be used as a decorator to parameters of a class.
+
+### [decorator] Optional
+
+```tsx
+export declare function Optional<T>(key: DependencyKey<T>): (target: Ctor<T>, _key: string, index: number) => void;
+```
+
+This decorator could be applied to parameters of a class to mark its dependencies as **optional**.
+
+### [decorator] Need
+
+```tsx
+export declare function Need<T>(key: DependencyKey<T>): <C>(target: Ctor<C>, _key: string, index: number) => void;
+```
+
+This decorator could be applied to parameters of a class to mark its dependencies as **required**.
+
+### registerSingleton
+
+```tsx
+export declare function registerSingleton<T>(id: Identifier<T>, ctor: Ctor<T>, lazyInstantiation?: boolean): void;
+```
+
+Register a class dependency item as singleton with a identifier.
+
+## React
+
+### `Provider`
+
+Create a injection layer in your React application.
+
+```tsx
+export declare class Provider extends Component<InjectionProviderProps>;
+
+export interface InjectionProviderProps {
+    collection?: DependencyCollection;
+    injector?: Injector;
+}
+```
+
+`collection` and `injector` cannot be both `undefined`.
+
+### Provide
+
+An decorator that could be used on a React class component to provide a injection context on that component.
+
+```tsx
+export declare function Provide(items: DependencyItem<any>[]): (target: any) => any;
+```
+
+### `Inject`
+
+Returns decorator that could be used on a property of a React class component to inject a dependency
+
+```tsx
+export declare function Inject<T>(id: Identifier<T> | Ctor<T>, optional?: boolean): (target: any, propName: string, _originDescriptor?: any) => any;
+```
+
+### `useCollection`
+
+When providing dependencies in a functional component, it would be expensive (not to mention logic incorrectness) to recreate dependencies.
+
+This API is actually a memo to return the same `DependencyCollection` in a component.
+
+```tsx
+export declare function useCollection(entries?: DependencyItem<any>[]): DependencyCollection;
+```
+
+### `useDependency`
+
+```tsx
+export declare function useDependency<T>(key: DependencyKey<T>, optional?: boolean): T | null;
+```
+## RxJS
+
+### `useDependencyValue`
+
+Unwrap an observable value, return it to the component for rendering, and trigger re-render when value changes
+
+**IMPORTANT**. Parent and child components should not subscribe to the same observable, otherwise unnecessary re-render would be triggered. Instead, the top-most component should subscribe and pass value of the observable to its offspring, by props or context.
+
+If you have to do that, consider using `useDependencyContext` and `useDependencyContextValue` instead.
+
+```tsx
+export declare function useDependencyValue<T>(depValue$: Observable<T>, defaultValue?: T): T | undefined;
+```
+
+### `useDependencyContext` & `useDependencyContextValue`
+
+Subscribe to an observable value from a service, creating a context for it so its child component won't have to subscribe again and cause unnecessary.
+
+```tsx
+export declare function useDependencyContext<T>(depValue$: Observable<T>, defaultValue?: T): {
+    Provider: (props: {
+        initialState?: T | undefined;
+        children: React.ReactNode;
+    }) => JSX.Element;
+    value: T | undefined;
+};
+
+export declare function useDependencyContextValue<T>(depValue$: Observable<T>): T | undefined;
+```

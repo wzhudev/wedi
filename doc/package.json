@@ -1,5 +1,6 @@
 {
-  "name": "wedi-doc",
+  "name": "wedi",
+  "private": true,
   "scripts": {
     "docz:dev": "docz dev",
     "docz:build": "docz build",

@@ -3,6 +3,8 @@ name: Dependency Item
 route: /dependency-item
 ---
 
+# Dependency Item
+
 wedi supports different kinds of dependency items, including
 
 - classes
@@ -14,6 +16,8 @@ wedi supports different kinds of dependency items, including
 When you provide a dependency item (type `DependencyItem`), you're actually injecting a pair of _key_ & _value_. The value is the dependency item, and the _key_ is the identifier of it. Specially, a ES6 class could be the _key_ and the value and the same time.
 
 _key_ is an identifier returned by calling `createIdentifier`.
+
+Not that `key` or identifier is required when providing values, instances or factory methods but optional when providing classes.
 
 ```ts
 import { createIdentifier } from 'wedi'
@@ -60,7 +64,7 @@ class FileService {
 
 If `OptionalDependency` is not provided, wedi would not throw an error but return `null` instead to instantiate `FileService`.
 
-## Value or Instance as a Dependency Item
+## Value or Instance as Dependency
 
 It's easy to provide a value as dependency.
 
@@ -68,7 +72,7 @@ It's easy to provide a value as dependency.
 const configDep = [IConfig, { useValue: '2020' }]
 ```
 
-## Factory Function as a Dependency Item
+## Factory Function as Dependency
 
 You can create a dependency via `useFactory` that gives the control flow back to you on initializing.
 
@@ -81,7 +85,7 @@ const useDep = [IUserService, {
 
 ## Provide Items
 
-Finally, you should wrap all items in an array and pass them to `DependencyCollection`.
+Finally, you should wrap all items in an array and pass them to the constructor of `DependencyCollection`.
 
 ```ts
 const dependencies = [
@@ -108,4 +112,8 @@ For dependencies that should be singleton in the application, it's recommended t
 registerSingleton(/* a dependency item */)
 ```
 
-Dependencies would be provided by the root provider.
+Dependencies would be provided by the root provider. In another word, the provider which is constructed without a `parent` parameter.
+
+## Lazy Instantiation
+
+

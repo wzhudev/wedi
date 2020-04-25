@@ -7,6 +7,19 @@ route: /
 
 **wedi** is a lightweight toolkit to let you use dependency injection (DI) pattern in TypeScript and especially React with TypeScript.
 
+- Completely opt-in. It's up to you to decide when and where to apply dependency injection pattern.
+- Provide a multi-level dependency injection system.
+- Support injecting classes, instances, values and factories.
+- Support React class component.
+- Support React Hooks (functional component).
+
+You can use wedi to:
+
+- Mange state of applications
+- Reuse logic
+- Deal with cross-platform problems
+- Write code that is loosely-coupled, easy to understand and maintain
+
 ## Getting Started
 
 _This guide assumes basic knowledge of TypeScript, React and dependency injection pattern. If you are totally innocent of any idea above, it might not be the best idea to get started with wedi._
@@ -69,6 +82,25 @@ function Profile() {
 wedi provide some Hooks that helps you use wedi with RxJS smoothly.
 
 ```tsx
+function ReRenderOnNewValue() {
+  const notificationS = useDependency(NotificationService);
+  const val = useDependencyValue(notificationS.data$)
+
+  // re-return when data$ emits a new value
+}
 ```
 
-For more, please read With RxJS for more details.
+For more, please read With [RxJS](/rx) for more details.
+
+## Demo
+
+Here is a TodoMVC [demo](https://wendellhu95.github.io/wedi-demo) built with wedi.
+
+## Links
+
+- [GitHub Repo](https://github.com/wendellhu95/wedi)
+- [Doc](https://wedi.wendellhu95.xyz)
+
+## License
+
+MIT. Copyright Wendell Hu 2019-2020.
