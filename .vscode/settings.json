@@ -4,5 +4,9 @@
   "terminal.integrated.shell.windows": "C:/Windows/system32/WindowsPowerShell/v1.0/powershell.exe",
   "terminal.integrated.shellArgs.windows": [
     "-NoLogo"
+  ],
+  "cSpell.words": [
+    "Displayer",
+    "Lifecycle"
   ]
 }

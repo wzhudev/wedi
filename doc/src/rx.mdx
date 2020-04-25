@@ -1,0 +1,89 @@
+---
+name: With RxJS
+route: /rx
+---
+
+# With RxJS
+
+_This guide assumes that you have a basic knowledge of RxJS and reactive programming._
+
+wedi gives you a clear model for state management and logic reuse. With RxJS, wedi brings reactive programming to your application.
+
+## An Example
+
+Here is a real-life example. Assuming that we need to fetch latest notifications every 10 seconds after the application bootstraps and the header bar is rendered on the screen. And when the previous request for notification gets delayed, we need to drop it when the current request is sent.
+
+See the RxJS + wedi version:
+
+```tsx
+class NotificationService implements Disposable {
+  destroy$: Subject<void>()
+  notifications$: Observable<Array<INotification>>
+
+  constructor(
+    @Need(ILifecycleService) lifecycleS: ILifecycleService,
+    @Need(IHttpService) httpS: IHttpService
+  ) {
+    this.destroy = new Subject<void>();
+    this.notificationS = this.lifecycleS.bootstrap$
+      .pipe(
+        take(1),
+        concatMap(() => interval(10000)),
+        concatMap(() => httpS.request(/* some url */)),
+        startWith([]),
+        takeUntil(this.destroy$),
+      )
+  }
+
+  dispose(): void {
+    this.destroy$.next()
+    this.destroy$.complete()
+  }
+}
+
+function Header() {
+  const collection = useCollection([NotificationService])
+
+  return <Provider collection={collection}>
+    <DeeplyWrapped>
+      <NotificationDisplayer />
+    </DeeplyWrapper>
+  </Provider>
+}
+
+
+function NotificationDisplayer() {
+  const notiS = useDependency(NotificationService)
+  const notifications = useDependencyValue(notiS.notifications$)
+
+  // render notifications
+}
+```
+
+You can see that the code is concise, declarative, easy to understand and maintain. Logic is completely moved from components to services.
+
+In fact, you could use any reactive programming library with wedi since it just provide a framework on which you can put observables and subscriptions. But wedi provides Hooks that works with RxJS to make your life easier.
+
+## Value Context
+
+Sometimes you need to subscribe to the same observable value in a component and its child components. You could use `useDependencyValue`. But this would cause unnecessary reconciliation. You could subscribe in the parent component and pass values to the child components, but it would be troublesome if the child component is deeply wrapped. So it's nature to use React Context here. wedi provides `useDependencyContext` and `useDependencyContextValue` to make this easier.
+
+```tsx
+function Parent() {
+  const authS = useDependency(AuthenticationService)
+  const { Provider: AuthProvider } = useDependencyContext(authS.auth$, {})
+
+  return (
+    <AuthProvider>
+      <Child />
+    </AuthProvider>
+  )
+}
+
+function Child() {
+  const authS = useDependency(AuthenticationService)
+  const auth = useDependencyContextValue(authS.auth$)
+
+  // adjust UI according to authentication info
+}
+```

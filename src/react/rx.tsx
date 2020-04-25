@@ -18,16 +18,17 @@ import { BehaviorSubject, Observable } from 'rxjs'
  * **IMPORTANT**. Parent and child components should not subscribe to the same
  * observable, otherwise unnecessary re-render would be triggered. Instead, the
  * top-most component should subscribe and pass value of the observable to
- * its offspring, by props or context. Unlike Angular, React does not check
- * dirty values and mark as dirty before updates.
+ * its offspring, by props or context.
+ *
+ * If you have to do that, consider using `useDependencyContext` and
+ * `useDependencyContextValue` instead.
  */
 export function useDependencyValue<T>(
   depValue$: Observable<T>,
   defaultValue?: T
 ): T | undefined {
   const _defaultValue: T | undefined =
-    depValue$ instanceof BehaviorSubject &&
-    typeof defaultValue === 'undefined'
+    depValue$ instanceof BehaviorSubject && typeof defaultValue === 'undefined'
       ? depValue$.getValue()
       : defaultValue
   const [value, setValue] = useState(_defaultValue)
