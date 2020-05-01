@@ -1,4 +1,4 @@
-import React, { Component, createContext } from 'react'
+import React, { Component, createContext, ComponentType } from 'react'
 
 import { DependencyCollection } from '../collection'
 import { Injector } from '../injector'
@@ -63,6 +63,25 @@ export class Provider extends Component<InjectionProviderProps> {
       <InjectionConsumer>
         {(context) => this.renderChild(context)}
       </InjectionConsumer>
+    )
+  }
+}
+
+/**
+ * return a HOC that enable functional component to add injector
+ * in a convenient way
+ */
+export function connectProvider<T>(
+  Comp: ComponentType<T>,
+  options: InjectionProviderProps
+) {
+  const { injector, collection } = options
+
+  return function ComponentWithInjector(props: T) {
+    return (
+      <Provider injector={injector} collection={collection}>
+        <Comp {...props} />
+      </Provider>
     )
   }
 }

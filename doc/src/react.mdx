@@ -129,7 +129,23 @@ function FunctionConsumer() {
 }
 ```
 
-Note that functional cannot consume items provided by itself.
+Note that functional cannot consume items provided by itself. By you could use `connectProvider` to make things easier.
+
+```tsx
+import { FileService } from 'services/file'
+import { LogService } from 'services/log'
+
+const FunctionConsumer = connectProvider((function() {
+  const fileService: FileService = useDependency(FileService)
+  const log: LogService | null = useDependency(LogService, true)
+
+  return {
+    /* use dependencies */
+  }), {
+    collection: new DependencyCollection([FileService, LogService])
+  })
+}
+```
 
 ## Multi-Layered Injector System
 

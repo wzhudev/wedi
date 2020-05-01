@@ -12,7 +12,8 @@ import {
   Provider,
   useCollection,
   useDependency,
-  useMultiDependencies
+  useMultiDependencies,
+  connectProvider
 } from '../src'
 
 class Log {
@@ -112,7 +113,29 @@ describe('di-react', () => {
   })
 
   describe('functional component', () => {
-    it('should useMultilpleDependencies work', () => {
+    it('should `connectProvider` work', () => {
+      class Log {
+        log(): string {
+          return 'wedi'
+        }
+      }
+
+      const App = connectProvider(
+        function() {
+          const log = useDependency(Log)
+
+          return <div>{log.log()}</div>
+        },
+        {
+          collection: new DependencyCollection([Log])
+        }
+      )
+
+      const { container } = render(<App />)
+      expect(container.firstElementChild!.textContent).toBe('wedi')
+    })
+
+    it('should useMultipleDependencies work', () => {
       class Log {
         log(): string {
           return 'wedi'

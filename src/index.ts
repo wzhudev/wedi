@@ -21,7 +21,8 @@ export { Provide, Inject } from './react/decorators'
 export {
   InjectionContext,
   Provider,
-  InjectionProviderProps
+  InjectionProviderProps,
+  connectProvider
 } from './react/context'
 export {
   useCollection,
