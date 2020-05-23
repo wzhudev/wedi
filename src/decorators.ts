@@ -10,10 +10,10 @@ export function createIdentifier<T>(name: string): Identifier<T> {
 
   const id = function(target: Ctor<T>, _key: string, index: number): void {
     setDependencies(target, id, index, false)
-  } as any
+  } as Identifier<T>
 
   id.toString = () => name
-  id[IdentifierSymbol] = true // mark this as an identifier
+  id[IdentifierSymbol] = true
 
   dependencyIds.set(name, id)
 

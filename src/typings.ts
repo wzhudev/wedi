@@ -1,11 +1,13 @@
 export type Ctor<T = any> = new (...args: any[]) => T
 
-export interface Identifier<T = any> {
-  (...args: any[]): void
-  type?: T
-}
+export const IdentifierSymbol = Symbol('$$WEDI_IDENTIFIER')
 
-export const IdentifierSymbol = Symbol('identifier')
+export interface Identifier<T = any> {
+  type?: T
+  toString(): string
+  [IdentifierSymbol]: boolean
+  (target: Ctor<T>, key: string, index: number): void
+}
 
 export function isIdentifier(thing: any): thing is Identifier {
   return thing[IdentifierSymbol]
