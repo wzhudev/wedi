@@ -74,7 +74,7 @@ export class Provider extends Component<InjectionProviderProps> {
 export function connectProvider<T>(
   Comp: ComponentType<T>,
   options: InjectionProviderProps
-) {
+): ComponentType<T> {
   const { injector, collection } = options
 
   return function ComponentWithInjector(props: T) {
