@@ -1,4 +1,4 @@
-import React, { Component, createContext, ComponentType } from 'react'
+import React, { createContext, ComponentType, PropsWithChildren } from 'react'
 
 import { DependencyCollection } from '../collection'
 import { Injector } from '../injector'
@@ -34,37 +34,33 @@ export interface InjectionProviderProps {
  * </Provider>
  * ```
  */
-export class Provider extends Component<InjectionProviderProps> {
-  renderChild(context: InjectionContextValue) {
-    const { collection, children, injector } = this.props
-    const parentInjector = context.injector
+export function Provider(props: PropsWithChildren<InjectionProviderProps>) {
+  const { collection, children, injector } = props
 
-    if (!!collection === !!injector) {
-      throw new Error(
-        '[wedi] should provide a collection or an injector to "Provider"'
-      )
-    }
+  return (
+    <InjectionConsumer>
+      {(context: InjectionContextValue) => {
+        const parentInjector = context.injector
 
-    const finalInjector = injector
-      ? injector
-      : parentInjector
-      ? parentInjector.createChild(collection)
-      : new Injector(collection!)
+        if (!!collection === !!injector) {
+          throw new Error(
+            '[wedi] should provide a collection or an injector to "Provider"'
+          )
+        }
 
-    return (
-      <InjectionProvider value={{ injector: finalInjector }}>
-        {children}
-      </InjectionProvider>
-    )
-  }
+        const finalInjector =
+          injector ||
+          parentInjector?.createChild(collection) ||
+          new Injector(collection!)
 
-  render() {
-    return (
-      <InjectionConsumer>
-        {(context) => this.renderChild(context)}
-      </InjectionConsumer>
-    )
-  }
+        return (
+          <InjectionProvider value={{ injector: finalInjector }}>
+            {children}
+          </InjectionProvider>
+        )
+      }}
+    </InjectionConsumer>
+  )
 }
 
 /**
