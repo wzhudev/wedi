@@ -26,20 +26,22 @@ export class Injector implements Disposable {
   private readonly parent?: Injector
   private readonly collection: DependencyCollection
 
-  constructor(collection: DependencyCollection, parent?: Injector) {
+  constructor(collection?: DependencyCollection, parent?: Injector) {
+    const _collection = collection || new DependencyCollection()
+
     // if there's no parent injector, should get singleton dependencies
     if (!parent) {
       const newDependencies = getSingletonDependencies()
       // root injector would not re-add dependencies when the component
       // it embeds re-render
       newDependencies.forEach((d) => {
-        if (!collection.has(d[0])) {
-          collection.add(d[0], d[1])
+        if (!_collection.has(d[0])) {
+          _collection.add(d[0], d[1])
         }
       })
     }
 
-    this.collection = collection
+    this.collection = _collection
     this.parent = parent
   }
 
@@ -60,23 +62,6 @@ export class Injector implements Disposable {
     dependencies: DependencyCollection = new DependencyCollection()
   ): Injector {
     return new Injector(dependencies, this)
-  }
-
-  /**
-   * get a dependency
-   */
-  get<T>(id: DependencyKey<T>): T | null {
-    const thing = this.getDependencyOrIdentifierPair(id)
-
-    if (typeof thing === 'undefined') {
-      // not provided
-      return null
-    } else if (thing instanceof InitPromise || isFactoryItem(thing)) {
-      // not initialized yet
-      return null
-    } else {
-      return this.getOrInit(id)
-    }
   }
 
   /**
@@ -164,14 +149,8 @@ export class Injector implements Disposable {
   private putDependencyBack<T>(key: DependencyKey<T>, value: T): void {
     if (this.collection.get(key)) {
       this.collection.add(key, value)
-    } else if (this.parent) {
-      this.parent.putDependencyBack(key, value)
     } else {
-      throw new Error(
-        `[wedi] cannot find a place to to the new created ${getDependencyKeyName(
-          key
-        )}`
-      )
+      this.parent!.putDependencyBack(key, value)
     }
   }
 

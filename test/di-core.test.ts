@@ -7,11 +7,23 @@ import {
 } from '../src'
 
 describe('di-core', () => {
-  describe('create instance', () => {
+  describe('basics', () => {
     class A {}
 
     class B {
       constructor(public p: any, @Need(A) public a: A) {}
+    }
+
+    class C {
+      key = 'wedi'
+    }
+
+    class D {
+      constructor(@Optional(A) public a?: A) {}
+    }
+
+    class E {
+      constructor(@Need(A) public a?: A) {}
     }
 
     const key = 'key'
@@ -37,9 +49,43 @@ describe('di-core', () => {
 
       expect(b.p).toBe(undefined)
     })
+
+    it('should support adding dependencies', () => {
+      const injector = new Injector()
+
+      let c = injector.getOrInit(C)
+      expect(c).toBe(null)
+
+      injector.add(C)
+      c = injector.getOrInit(C)!
+      expect(c.key).toBe('wedi')
+    })
+
+    it('should tolerate a missing optional dependency', () => {
+      const injector = new Injector(new DependencyCollection([D]))
+      const d = injector.getOrInit(D)
+
+      expect(d!.a).toBe(null)
+    })
+
+    it('should raise error when a required dependency is missing', () => {
+      const injector = new Injector(new DependencyCollection([E]))
+
+      expect(() => {
+        injector.getOrInit(E)
+      }).toThrowError()
+    })
+
+    it('should return null when dependency is not retrievable', () => {
+      const id = createIdentifier('void')
+      const injector = new Injector()
+
+      const nothing = injector.getOrInit(id)
+      expect(nothing).toBe(null)
+    })
   })
 
-  describe('different kinds of dependencies', () => {
+  describe('work with different kinds of dependencies', () => {
     class A {}
 
     const id = createIdentifier('a')
@@ -127,6 +173,32 @@ describe('di-core', () => {
 
       expect(initFlag).toBeTruthy()
     })
+
+    it('should detect circular dependency', () => {
+      const id = createIdentifier('a')
+      const id2 = createIdentifier('b')
+
+      class A {
+        constructor(@Need(id2) public _b: B) {}
+      }
+
+      class B {
+        constructor(@Need(id) public _a: A) {}
+      }
+
+      const injector = new Injector(
+        new DependencyCollection([
+          [id, { useClass: A }],
+          [id2, { useClass: B }]
+        ])
+      )
+
+      expect(() => {
+        injector.getOrInit(id)
+      }).toThrow(
+        `[wedi] "createInstance" exceeds the limitation of recursion (10x). There might be a circular dependency among your dependency items. Last target was "b".`
+      )
+    })
   })
 
   describe('layered injectors', () => {
@@ -162,36 +234,7 @@ describe('di-core', () => {
       const childInjector = injector.createChild()
 
       expect(childInjector.getOrInit(id)?.log()).toBe('A')
-      expect(childInjector.get(id)?.log()).toBe('A')
-    })
-  })
-
-  describe('initialization', () => {
-    it('should raise error when a required dependency is missing', () => {
-      class A {}
-
-      class B {
-        constructor(@Need(A) public a: A) {}
-      }
-
-      const injector = new Injector(new DependencyCollection([B]))
-
-      expect(() => {
-        injector.getOrInit(B)
-      }).toThrowError()
-    })
-
-    it('should tolerate a missing optional dependency', () => {
-      class A {}
-
-      class B {
-        constructor(@Optional(A) public a?: A) {}
-      }
-
-      const injector = new Injector(new DependencyCollection([B]))
-      const thing = injector.getOrInit(B)
-
-      expect(thing!.a).toBe(null)
+      expect(childInjector.getOrInit(id)?.log()).toBe('A')
     })
   })
 
@@ -199,6 +242,8 @@ describe('di-core', () => {
     const id = createIdentifier('a')
 
     class A {
+      value = 'a'
+
       constructor() {
         initFlag = true
       }
@@ -213,6 +258,14 @@ describe('di-core', () => {
 
       log(): string {
         return this.a.log()
+      }
+
+      getValue(): string {
+        return this.a.value
+      }
+
+      setValue(val: string) {
+        this.a.value = val
       }
     }
 
@@ -230,9 +283,13 @@ describe('di-core', () => {
       const instance = injector.getOrInit(B)
       expect(initFlag).toBeFalsy()
 
-      const log = instance?.log()
-      expect(log).toBe('[wedi]')
+      expect(instance?.log()).toBe('[wedi]') // work for methods
+      expect(instance?.getValue()).toBe('a') // work for properties
+      expect(instance?.log()).toBe('[wedi]') // should cache methods
       expect(initFlag).toBeTruthy()
+
+      instance?.setValue('b') // should set value work
+      expect(instance?.getValue()).toBe('b')
     })
 
     it('should initialize on CPU idle', async () => {
@@ -256,58 +313,8 @@ describe('di-core', () => {
       const injector = new Injector(new DependencyCollection())
 
       injector.dispose()
-      expect(() => injector.get(id)).toThrow(
+      expect(() => injector.getOrInit(id)).toThrow(
         '[wedi] Dependency collection is not accessible after it disposes!'
-      )
-    })
-  })
-
-  describe('falsy situations', () => {
-    it('should return null when dependency is not retrievable', () => {
-      const id = createIdentifier('void')
-      const injector = new Injector(new DependencyCollection())
-
-      const nothing = injector.get(id)
-      expect(nothing).toBe(null)
-    })
-
-    it('should raise error when a dependency cannot be initialized', () => {
-      class A {}
-
-      class B {
-        constructor(@Need(A) public _a: A) {}
-      }
-
-      const injector = new Injector(new DependencyCollection([B]))
-
-      expect(() => injector.getOrInit(B)).toThrow(
-        '[wedi] "B" relies on a not provided dependency "A".'
-      )
-    })
-
-    it('should detect circular dependency', () => {
-      const id = createIdentifier('a')
-      const id2 = createIdentifier('b')
-
-      class A {
-        constructor(@Need(id2) public _b: B) {}
-      }
-
-      class B {
-        constructor(@Need(id) public _a: A) {}
-      }
-
-      const injector = new Injector(
-        new DependencyCollection([
-          [id, { useClass: A }],
-          [id2, { useClass: B }]
-        ])
-      )
-
-      expect(() => {
-        injector.getOrInit(id)
-      }).toThrow(
-        `[wedi] "createInstance" exceeds the limitation of recursion (10x). There might be a circular dependency among your dependency items. Last target was "a".`
       )
     })
   })
