@@ -260,6 +260,26 @@ describe('di-react', () => {
       expect(error!.message).toBe(`[wedi] Cannot get an instance of "Log".`)
     })
 
+    it('should raise error when no collection nor injector is provided', () => {
+      function App() {
+        return (
+          <Provider>
+            <div>wedi</div>
+          </Provider>
+        )
+      }
+
+      let error: Error
+      try {
+        render(<App />)
+      } catch (e) {
+        error = e
+      }
+      expect(error!.message).toBe(
+        '[wedi] should provide a collection or an injector to "Provider".'
+      )
+    })
+
     it('should tolerate when dependency is optional', () => {
       function AppContainer() {
         const collection = useCollection([])

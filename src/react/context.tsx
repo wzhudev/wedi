@@ -44,7 +44,7 @@ export function Provider(props: PropsWithChildren<InjectionProviderProps>) {
 
         if (!!collection === !!injector) {
           throw new Error(
-            '[wedi] should provide a collection or an injector to "Provider"'
+            '[wedi] should provide a collection or an injector to "Provider".'
           )
         }
 
