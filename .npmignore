@@ -5,6 +5,7 @@
 *.log
 *.tgz
 azure-pipelines.yml
+coverage
 doc
 example
 jest.config.js
