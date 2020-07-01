@@ -40,8 +40,10 @@ describe('di-react', () => {
       expect(container.firstChild!.textContent).toBe('wedi')
     })
 
-    xit('should raise error when user tries to set dependency', () => {
+    it('should raise error when user tries to set dependency', () => {
       class A {}
+
+      let callback = () => {}
 
       @Provide([A])
       class App extends Component {
@@ -50,17 +52,23 @@ describe('di-react', () => {
         @Inject(A) public a!: A
 
         render() {
-          return <div onClick={() => (this.a = null as any)}>wedi</div>
+          // use a callback instead of tracking an async event
+          callback = () => (this.a = null as any)
+          return <div>wedi</div>
         }
       }
 
-      const { container } = render(<App />)
+      render(<App />)
 
-      expect(() => {
-        act(() => {
-          fireEvent.click(container.firstElementChild!)
-        })
-      }).toThrow()
+      let error: Error
+      try {
+        callback()
+      } catch (e) {
+        error = e
+      }
+      expect(error!.message).toBe(
+        '[wedi] You can never set value to a dependency. Check "a" of "A".'
+      )
     })
 
     it('should raise error when component context is not set to InjectionContext', () => {
@@ -73,7 +81,13 @@ describe('di-react', () => {
         }
       }
 
-      expect(() => render(<App />)).toThrow(
+      let error: Error
+      try {
+        render(<App />)
+      } catch (e) {
+        error = e
+      }
+      expect(error!.message).toBe(
         `[wedi] You should make "InjectorContext" as App's default context type. If you want to use multiple context, please check this page on React documentation. https://reactjs.org/docs/context.html#classcontexttype`
       )
     })
@@ -90,9 +104,13 @@ describe('di-react', () => {
         }
       }
 
-      expect(() => render(<App />)).toThrow(
-        '[wedi] Cannot get an instance of "Log".'
-      )
+      let error: Error
+      try {
+        render(<App />)
+      } catch (e) {
+        error = e
+      }
+      expect(error!.message).toBe('[wedi] Cannot get an instance of "Log".')
     })
 
     it('should tolerate when dependency is optional', () => {
@@ -233,9 +251,13 @@ describe('di-react', () => {
         return <div>{log.log()}</div>
       }
 
-      expect(() => render(<AppContainer />)).toThrow(
-        `[wedi] Cannot get an instance of "Log".`
-      )
+      let error: Error
+      try {
+        render(<AppContainer />)
+      } catch (e) {
+        error = e
+      }
+      expect(error!.message).toBe(`[wedi] Cannot get an instance of "Log".`)
     })
 
     it('should tolerate when dependency is optional', () => {

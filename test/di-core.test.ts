@@ -7,6 +7,8 @@ import {
 } from '../src'
 
 describe('di-core', () => {
+  const voidIdentifier = createIdentifier('void')
+
   describe('basics', () => {
     class A {}
 
@@ -53,11 +55,11 @@ describe('di-core', () => {
     it('should support adding dependencies', () => {
       const injector = new Injector()
 
-      let c = injector.getOrInit(C)
+      let c = injector.getOrInit(C, true)
       expect(c).toBe(null)
 
       injector.add(C)
-      c = injector.getOrInit(C)!
+      c = injector.getOrInit(C)
       expect(c.key).toBe('wedi')
     })
 
@@ -71,17 +73,36 @@ describe('di-core', () => {
     it('should raise error when a required dependency is missing', () => {
       const injector = new Injector(new DependencyCollection([E]))
 
-      expect(() => {
+      let error: Error
+      try {
         injector.getOrInit(E)
-      }).toThrowError()
+      } catch (e) {
+        error = e
+      }
+      expect(error!.message).toBe(
+        '[wedi] "E" relies on a not provided dependency "A".'
+      )
     })
 
-    it('should return null when dependency is not retrievable', () => {
-      const id = createIdentifier('void')
+    it('should return null when an optional thing is not retrievable', () => {
       const injector = new Injector()
 
-      const nothing = injector.getOrInit(id)
+      const nothing = injector.getOrInit(voidIdentifier, true)
       expect(nothing).toBe(null)
+    })
+
+    it('should raise error when a thing is not retrievable', () => {
+      const injector = new Injector()
+
+      let error: Error
+      try {
+        injector.getOrInit(voidIdentifier)
+      } catch (e) {
+        error = e
+      }
+      expect(error!.message).toBe(
+        `[wedi] "void" is not provided by any injector.`
+      )
     })
   })
 
@@ -193,9 +214,13 @@ describe('di-core', () => {
         ])
       )
 
-      expect(() => {
+      let error: Error
+      try {
         injector.getOrInit(id)
-      }).toThrow(
+      } catch (e) {
+        error = e
+      }
+      expect(error!.message).toBe(
         `[wedi] "createInstance" exceeds the limitation of recursion (10x). There might be a circular dependency among your dependency items. Last target was "b".`
       )
     })
@@ -309,11 +334,17 @@ describe('di-core', () => {
 
   describe('dispose', () => {
     it('should not be accessible after disposing', () => {
-      const id = createIdentifier('void')
       const injector = new Injector(new DependencyCollection())
 
       injector.dispose()
-      expect(() => injector.getOrInit(id)).toThrow(
+
+      let error: Error
+      try {
+        injector.getOrInit(voidIdentifier)
+      } catch (e) {
+        error = e
+      }
+      expect(error!.message).toBe(
         '[wedi] Dependency collection is not accessible after it disposes!'
       )
     })

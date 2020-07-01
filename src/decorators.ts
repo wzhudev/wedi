@@ -3,7 +3,7 @@ import { dependencyIds, setDependencies } from './utils'
 
 export function createIdentifier<T>(name: string): Identifier<T> {
   if (dependencyIds.has(name)) {
-    console.warn(`[DI] duplicated identifier name ${name}.`)
+    console.warn(`[wedi] duplicated identifier name ${name}.`)
 
     return dependencyIds.get(name)!
   }

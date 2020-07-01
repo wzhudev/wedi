@@ -62,7 +62,7 @@ export function Inject<T>(
         ensureInjectionContextExists(thisAsComponent)
 
         const injector: Injector = thisAsComponent.context.injector
-        const thing = injector && injector.getOrInit(id)
+        const thing = injector?.getOrInit(id, true)
 
         if (!optional && !thing) {
           throw Error(

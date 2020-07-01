@@ -31,7 +31,7 @@ export function useDependency<T>(
   optional?: boolean
 ): T | null {
   const { injector } = useContext(InjectionContext)
-  const thing = injector?.getOrInit(key)
+  const thing = injector?.getOrInit(key, true)
 
   if (!optional && !thing) {
     throw Error(

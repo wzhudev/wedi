@@ -67,20 +67,29 @@ export class Injector implements Disposable {
   /**
    * get a dependency or create one in the current injector
    */
-  getOrInit<T>(id: DependencyKey<T>): T | null {
-    const thing = this.getDependencyOrIdentifierPair(id)
+  getOrInit<T>(key: DependencyKey<T>): T
+  getOrInit<T>(key: DependencyKey<T>, optional: true): T | null
+  getOrInit<T>(key: DependencyKey<T>, optional?: true): T | null {
+    const thing = this.getDependencyOrIdentifierPair(key)
 
     if (typeof thing === 'undefined') {
+      if (!optional) {
+        throw new Error(
+          `[wedi] "${getDependencyKeyName(
+            key
+          )}" is not provided by any injector.`
+        )
+      }
       return null
     } else if (isInitPromise(thing)) {
-      return this.createAndCacheInstance(id, thing)
+      return this.createAndCacheInstance(key, thing)
     } else if (isValueItem(thing)) {
       return thing.useValue
     } else if (isFactoryItem(thing)) {
-      return this.invokeDependencyFactory(id as Identifier<T>, thing)
+      return this.invokeDependencyFactory(key as Identifier<T>, thing)
     } else if (isClassItem(thing)) {
       return this.createAndCacheInstance(
-        id,
+        key,
         new InitPromise(thing.useClass, !!thing.lazyInstantiation)
       )
     } else {
@@ -102,7 +111,7 @@ export class Injector implements Disposable {
     let args = [...extraParams]
 
     for (const dependency of dependencies) {
-      const thing = this.getOrInit(dependency.id)
+      const thing = this.getOrInit(dependency.id, true)
 
       if (thing === null && !dependency.optional) {
         throw new Error(
@@ -122,7 +131,7 @@ export class Injector implements Disposable {
 
     if (args.length !== firstDependencyArgIndex) {
       console.warn(
-        `[DI] expected ${firstDependencyArgIndex} non-injected parameters ` +
+        `[wedi] expected ${firstDependencyArgIndex} non-injected parameters ` +
           `but ${args.length} parameters are provided.`
       )
 
@@ -204,7 +213,9 @@ export class Injector implements Disposable {
     id: Identifier<T>,
     factory: FactoryItem<T>
   ): T {
-    const dependencies = factory.deps?.map((dp) => this.getOrInit(dp)) || []
+    // TODO: should report missing dependency for factories?
+    const dependencies =
+      factory.deps?.map((dp) => this.getOrInit(dp, true)) || []
     const thing = factory.useFactory.call(null, dependencies)
 
     this.collection.add(id, {
