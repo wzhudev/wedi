@@ -18,7 +18,7 @@ import {
 describe('di-rx', () => {
   it('should demo works with RxJS', async () => {
     class CounterService {
-      counter$ = interval(1000).pipe(
+      counter$ = interval(100).pipe(
         startWith(0),
         scan((acc) => acc + 1)
       )
@@ -42,7 +42,7 @@ describe('di-rx', () => {
     expect(container.firstChild!.textContent).toBe('0')
 
     await act(
-      () => new Promise<undefined>((res) => setTimeout(() => res(), 3100))
+      () => new Promise<undefined>((res) => setTimeout(() => res(), 360))
     )
     expect(container.firstChild!.textContent).toBe('3')
   })
@@ -59,7 +59,7 @@ describe('di-rx', () => {
         this.loop = (setInterval(() => {
           this.number += 1
           this.counter$.next(this.number)
-        }, 1000) as any) as number
+        }, 100) as any) as number
       }
 
       dispose(): void {
@@ -88,7 +88,7 @@ describe('di-rx', () => {
     expect(container.firstChild!.textContent).toBe('5')
 
     await act(
-      () => new Promise<undefined>((res) => setTimeout(() => res(), 3200))
+      () => new Promise<undefined>((res) => setTimeout(() => res(), 320))
     )
     expect(container.firstChild!.textContent).toBe('8')
   })
@@ -97,7 +97,7 @@ describe('di-rx', () => {
     let childRenderCount = 0
 
     class CounterService {
-      counter$ = interval(1000).pipe(
+      counter$ = interval(100).pipe(
         startWith(0),
         scan((acc) => acc + 1)
       )
@@ -130,7 +130,7 @@ describe('di-rx', () => {
     expect(childRenderCount).toBe(1)
 
     await act(
-      () => new Promise<undefined>((res) => setTimeout(() => res(), 3100))
+      () => new Promise<undefined>((res) => setTimeout(() => res(), 360))
     )
     expect(container.firstChild!.textContent).toBe('3')
     expect(childRenderCount).toBe(4)
@@ -140,7 +140,7 @@ describe('di-rx', () => {
     let childRenderCount = 0
 
     class CounterService {
-      counter$ = interval(1000).pipe(
+      counter$ = interval(100).pipe(
         startWith(0),
         scan((acc) => acc + 1)
       )
@@ -185,10 +185,54 @@ describe('di-rx', () => {
     expect(childRenderCount).toBe(1)
 
     await act(
-      () => new Promise<undefined>((res) => setTimeout(() => res(), 3100))
+      () => new Promise<undefined>((res) => setTimeout(() => res(), 360))
     )
     // expect(container.firstChild!.textContent).toBe('3')
     expect(childRenderCount).toBe(4)
+  })
+
+  it('should raise error when no ancestor subscribe an observable value', async () => {
+    class CounterService {
+      counter$ = interval(1000).pipe(
+        startWith(0),
+        scan((acc) => acc + 1)
+      )
+    }
+
+    function App() {
+      const collection = useCollection([CounterService])
+
+      return (
+        <Provider collection={collection}>
+          <Parent />
+        </Provider>
+      )
+    }
+
+    function useCounter$() {
+      return useDependency(CounterService).counter$
+    }
+
+    function Parent() {
+      return <Child />
+    }
+
+    function Child() {
+      const counter$ = useCounter$()
+      const count = useDependencyContextValue(counter$)
+
+      return <div>{count}</div>
+    }
+
+    let error: Error
+    try {
+      render(<App />)
+    } catch (e) {
+      error = e
+    }
+    expect(error!.message).toBe(
+      '[wedi] try to read context value but no ancestor component subscribed it.'
+    )
   })
 
   it('should update whenever `useUpdateBinder` emits', async () => {
@@ -232,7 +276,7 @@ describe('di-rx', () => {
     expect(container.firstChild!.textContent).toBe('0')
 
     await act(
-      () => new Promise<undefined>((res) => setTimeout(() => res(), 3200))
+      () => new Promise<undefined>((res) => setTimeout(() => res(), 3100))
     )
     expect(container.firstChild!.textContent).toBe('3')
   })

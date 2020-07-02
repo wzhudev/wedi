@@ -99,7 +99,7 @@ export function useDependencyContextValue<T>(
 
   if (!context) {
     throw new Error(
-      `[wedi] try to read context value but no ancestor component subscribed it ${depValue$}`
+      `[wedi] try to read context value but no ancestor component subscribed it.`
     )
   }
 
