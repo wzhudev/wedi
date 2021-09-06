@@ -1,4 +1,6 @@
-# wedi
+# \[deprecated\] wedi
+
+wedi is deprecated. I am working on a new implementation [redi](https://github.com/wendellhu95/redi).
 
 A lightweight dependency injection (DI) library for TypeScript, along with a binding for React.
 
